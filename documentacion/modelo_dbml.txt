@@ -1,0 +1,190 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+// Hecho por @AtsukaDeuss
+
+Table direcciones {
+  id uuid [primary key]
+  pais varchar [not null]
+  region varchar [not null]
+  ciudad varchar [not null]
+  comuna varchar [not null]
+  calle varchar [not null]
+  nro_calle varchar [not null]
+  cod_postal varchar [default: null]
+  direccion_fisica varchar [default: null] 
+
+  entidad_id uuid [not null] // Pueden haber más de una dirección por entidad. Ej: Una empresa puede tener muchas direcciones
+
+  fecha_creacion      timestamp // default current_timestamp
+  fecha_actualizacion timestamp // default current_timestamp on update current_timestamp
+}
+
+
+Table empresas {
+  id uuid [primary key]
+  rut varchar [not null]
+  nombre varchar [not null]
+  email varchar [not null]
+  razon_social varchar [not null]
+  giro varchar [not null]
+  descripcion text [default: null]
+
+  fecha_creacion      timestamp // default current_timestamp
+  fecha_actualizacion timestamp // default current_timestamp on update current_timestamp
+}
+
+
+Table obras {
+  id uuid [pk]
+  empresa_id uuid [ref: > empresas.id]
+  nombre_obra varchar [not null]
+  descripcion text [null]
+  tipo_obra varchar [not null] // construcción, remodelación, mantenimiento, etc.
+  estado    varchar [not null] // en_curso, finalizada, pausada, cancelada
+  fecha_inicio timestamp [not null]
+  fecha_fin    timestamp [not null]
+  presupuesto decimal [default: null]
+  encargado_id uuid [default: null] // si más adelante creas tabla de empleados
+  permiso_municipal varchar [default: null]
+  riesgo varchar // bajo, medio, alto, elevado
+
+  fecha_creacion      timestamp // default current_timestamp
+  fecha_actualizacion timestamp // default current_timestamp on update current_timestamp
+}
+
+
+Table inspecciones {
+  id uuid [primary key]
+  codigo varchar [not null]
+  revision varchar [not null]
+  fecha_formulario timestamp
+  fecha_inspeccion timestamp
+  hora_inicio timestamp
+  hora_termino timestamp
+  
+  encargado_id uuid [not null, ref: > usuarios.id] // Quién realiza la inspección
+  obra_id uuid [not null] // Obra inspeccionada <- empresa se obtiene atrávez de relacion empresa obras
+
+  participantes text
+  visita int [not null]// numero de la visita
+  fecha_prox_visita   timestamp
+
+  fecha_creacion      timestamp // default current_timestamp
+  fecha_actualizacion timestamp // default current_timestamp on update current_timestamp
+}
+
+Table hallazgo {
+  id uuid [primary key]
+  inspeccion_id uuid [not null, ref: > inspecciones.id]
+  descripcion varchar [not null]
+  criticidad enum('bajo', 'medio', 'alto', 'elevado') [not null]
+  ruta_imagen varchar [not null] 
+  fecha_cierre        timestamp
+  fecha_levantamiento timestamp
+
+  fecha_creacion      timestamp // default current_timestamp
+  fecha_actualizacion timestamp // default current_timestamp on update current_timestamp
+}
+
+
+Table usuarios {
+  id uuid [primary key]
+  nombre varchar [not null]
+  email varchar [not null]
+  contrasena varchar [not null]
+  rol enum('admin', 'prevencionista', 'encargado')
+  activo boolean [default: true]
+
+  fecha_creacion      timestamp // default current_timestamp
+  fecha_actualizacion timestamp // default current_timestamp on update current_timestamp
+
+  empresa_id uuid [default: null, ref: > empresas.id]
+}
+
+
+Table notificaciones {
+  id uuid [primary key]
+
+  // Usuario que generó la acción (NULL = sistema/worker)
+  usuario_id uuid [null, ref: > usuarios.id]
+  usuario_nombre varchar [null] // Denormalizado para historial
+
+  // Referencia genérica al recurso
+  recurso_tipo varchar [null] // 'observacion', 'documento', 'hallazgo', etc.
+  recurso_id uuid [null] // ID del recurso
+
+  descripcion text [null]
+  fecha_creacion timestamp // default current_timestamp
+}
+
+
+Table notificaciones_leidas {
+  id uuid [primary key]
+  notificacion_id uuid [not null, ref: > notificaciones.id]
+  usuario_id uuid [not null, ref: > usuarios.id]
+  fecha_lectura timestamp //default current_timestamp
+}
+
+
+Table notificaciones_usuarios {
+  id uuid [primary key]
+  notificacion_id uuid [not null, ref: > notificaciones.id]
+  usuario_id uuid [not null, ref: > usuarios.id]
+}
+
+Table canales {
+  id uuid [pk]
+  tipo varchar [not null] // 'empresa', 'obra', 'inspeccion', 'privado', 'grupo'
+
+  // Referencia genérica según el tipo
+  empresa_id uuid [default: null, ref: > empresas.id]
+  obra_id uuid [default: null, ref: > obras.id]
+  inspeccion_id uuid [default: null, ref: > inspecciones.id]
+
+  nombre varchar [default: null] // solo si es canal manual o privado
+  descripcion text [default: null]
+
+  fecha_creacion timestamp
+  fecha_actualizacion timestamp
+}
+
+
+Table canales_usuarios {
+  id uuid [pk]
+
+  canal_id uuid [not null, ref: > canales.id]
+  usuario_id uuid [not null, ref: > usuarios.id]
+
+  fecha_union timestamp // default current_timestamp
+}
+
+
+Table mensajes {
+  id uuid [pk]
+
+  canal_id uuid [not null, ref: > canales.id]
+  usuario_id uuid [not null, ref: > usuarios.id]
+
+  // denormalización útil
+  usuario_nombre varchar [not null] 
+  usuario_rol varchar [default: null]
+
+  contenido text [default: null]
+  tipo enum('texto', 'imagen', 'archivo', 'sistema') [not null]
+
+  archivo_url varchar [default: null]
+
+  fecha_creacion timestamp
+  fecha_actualizacion timestamp
+}
+
+
+Table mensajes_leidos {
+  id uuid [pk]
+
+  mensaje_id uuid [not null, ref: > mensajes.id]
+  usuario_id uuid [not null, ref: > usuarios.id]
+
+  fecha_lectura timestamp
+}

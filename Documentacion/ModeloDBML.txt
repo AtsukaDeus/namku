@@ -1,0 +1,42 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table Mensaje {
+  id integer [primary key]
+  canal_id integer
+}
+
+Table Canal {
+  id integer [primary key]
+}
+
+Table Inspeccion {
+  id integer [primary key]
+  codigo integer
+  revision varchar
+  fecha_formulario date
+  fecha_inspeccion date
+  hora_inicio timestamp
+  encargado varchar
+  empresa_inspecionada varchar
+  hora_termino timestamp
+  participantes varchar
+  obra_inspeccionada varchar
+  visita integer
+  proxima_visita date
+}
+
+Table Hallazgo {
+  id integer [primary key]
+  inspeccion_id integer [not null]
+  descripcion varchar
+  criticidad varchar
+  ruta_imagen varchar
+  fecha_cierre date
+  levantamiento date
+}
+
+
+
+Ref ins_hall: Hallazgo.inspeccion_id > Inspeccion.id 
+Ref can_men: Mensaje.canal_id > Canal.id
