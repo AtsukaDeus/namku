@@ -14,13 +14,14 @@ export async function select_usuario_by_email(email) {
 
 export async function create_usuario(usuario) {
     const sql = `
-        INSERT INTO usuarios (nombre, email, contrasena, rol, activo)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO usuarios (nombre, email, celular, contrasena, rol, activo)
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *
     `;
     const res = await query(sql, [
         usuario.nombre,
         usuario.email,
+        usuario.celular,
         usuario.contrasena_hashed || usuario.contrasena,
         usuario.rol,
         usuario.activo ?? true,

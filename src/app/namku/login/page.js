@@ -7,8 +7,12 @@ import { AlertCircle, Eye, EyeOff, Loader2, Lock, LogIn, Mail } from "lucide-rea
 import { Button } from "@/components/ui/button"
 import { APP_VERSION } from "@/constants/app_version"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
+import { useRouter } from "next/navigation"
+import { show_alert } from "@/lib/utils"
 
 export default function LoginPage() {
+    const router = useRouter();
+    
     const [email, set_email] = useState("")
     const [password, set_password] = useState("")
     const [error, set_error] = useState("")
@@ -35,7 +39,8 @@ export default function LoginPage() {
             if (res?.error) {
                 set_error(`${res.error}`)
             } else {
-                window.location.href = "/"
+                show_alert('success', 'Sesión Iniciada.', 'top-end', 3000, false);
+                router.push("/");
             }
         } catch (err) {
             set_error("Error al iniciar sesión. Intenta nuevamente.")
@@ -131,11 +136,19 @@ export default function LoginPage() {
                         </Button>
                     </form>
 
-                    <div className="mt-6 text-center text-xs text-[#7a758a] dark:text-[#c7c4d6]">
-                        Beta version {APP_VERSION}
-                    </div>
-                    <div className="mt-4 text-center text-xs text-[#7a758a] dark:text-[#c7c4d6]">
-                        Developed by @AtsukaDeuss
+                    <div className="mt-6 text-center text-xs text-[#7a758a] dark:text-[#c7c4d6] space-y-2">
+                        <p>Beta version {APP_VERSION}</p>
+                        <p>Developed by @AtsukaDeuss</p>
+                        <p>
+                            ¿No tienes cuenta?{" "}
+                            <button
+                                type="button"
+                                onClick={() => (window.location.href = "/namku/register")}
+                                className="underline hover:text-[#f6a020]"
+                            >
+                                Regístrate aquí
+                            </button>
+                        </p>
                     </div>
 
                 </div>

@@ -6,13 +6,14 @@ import { nuevo_usuario_service } from "../services/usuario_service";
  * Endpoint para crear un nuevo usuario en el sistema
  */
 export async function POST(req) {
-    // Validación de sessión como administrador
-    const auth = await validar_sesion_administrador();
-    if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    //! Dejamos fuera esta validación -> sólo un admin puede crear a un usuario (de momento)
+    // * Validación de sessión como administrador
+    // const auth = await validar_sesion_administrador();
+    // if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
     
     // Ejecución del servicio
     const data = await req.json();
-    const result = await nuevo_usuario_service(data, auth.session);
+    const result = await nuevo_usuario_service(data);
     
     if (result.error)  return NextResponse.json({ error: result.error }, { status: result.status });
 

@@ -43,6 +43,9 @@ export async function nuevo_usuario_service(usuario, session) {
         if (!usuario.email || usuario.email === '') {
             return { error: "El email no puede estar vacío", status: 400 };
         }
+        if (!usuario.celular || usuario.celular === '') {
+            return { error: "El celular no puede estar vacío", status: 400 };
+        }
         if (!usuario.pass || usuario.pass === '') {
             return { error: "La password no puede estar vacía", status: 400 };
         }
@@ -62,7 +65,7 @@ export async function nuevo_usuario_service(usuario, session) {
         }
 
         // Hashear la password
-        usuario.contrasena_hashed = await hash(usuario.contrasena, 10);
+        usuario.contrasena_hashed = await hash(usuario.pass, 10);
 
         // Crear usuario
         const res = await create_usuario(usuario);

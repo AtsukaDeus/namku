@@ -61,6 +61,7 @@ CREATE TABLE usuarios (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     nombre VARCHAR NOT NULL,
     email VARCHAR NOT NULL,
+    celular VARCHAR NOT NULL,
     contrasena VARCHAR NOT NULL,
     rol VARCHAR CHECK (rol IN ('admin', 'prevencionista', 'encargado')),
     activo BOOLEAN DEFAULT TRUE,
