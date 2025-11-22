@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-    title: "Previchat",
-    description: "Chat para recepción de observaciones en prevención de riegos",
+    title: "Namku",
+    description: "Chat para gestión y recepción de observaciones en prevención de riegos",
 };
 
 export default function RootLayout({ children }) {

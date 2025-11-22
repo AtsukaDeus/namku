@@ -15,9 +15,16 @@ export async function crear_notificacion({ tipo, usuario_id, usuario_nombre, rec
 }
 
 // ==========================================
-// ASIGNAR USUARIOS
+// ASIGNAR USUARIOS (alias para compatibilidad)
 // ==========================================
 export async function asignar_usuarios(notificacion_id, usuarios_ids) {
+    return await asignar_destinatarios(notificacion_id, usuarios_ids)
+}
+
+// ==========================================
+// ASIGNAR DESTINATARIOS
+// ==========================================
+export async function asignar_destinatarios(notificacion_id, usuarios_ids) {
     if (!usuarios_ids || usuarios_ids.length === 0) return
 
     // Eliminar duplicados

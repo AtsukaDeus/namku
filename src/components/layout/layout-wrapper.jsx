@@ -12,7 +12,7 @@ export function LayoutWrapper({ children }) {
   const pathname = usePathname()
 
   // Rutas donde NO se debe mostrar el navbar y sidebar
-  const isAuthPage = pathname === "/views/login" || pathname === "/views/register"
+  const isAuthPage = pathname === "/namku/login" || pathname === "/namku/register"
 
   // Si es página de autenticación, solo renderizar children sin layout
   if (isAuthPage) {

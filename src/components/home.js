@@ -210,7 +210,7 @@ export default function Home({ u_nombre, u_rol }) {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 flex-1 min-h-0">
+                <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 flex-1 min-h-0 -mt-15">
                     <div className="rounded-2xl bg-[#ebe9f4] dark:bg-[#28223f] border border-[#d3d2de] dark:border-[#312b48] p-4 space-y-3 overflow-y-auto">
                         <p className="text-sm font-semibold text-[#1f1b2f] dark:text-white">Flujo: inspección → canal → chat</p>
 

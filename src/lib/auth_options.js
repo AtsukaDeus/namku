@@ -19,15 +19,15 @@ export const authOptions = {
             );
             if (!rows.length) throw new Error("Usuario no encontrado");
 
-            const user = rows[0];
+            const usuario = rows[0];
 
             // Verificar si el usuario está activo
-            if (user.activo !== 1) throw new Error("Usuario bloqueado");
+            if (usuario.activo !== true) throw new Error("Usuario bloqueado");
 
-            const password_ok = await compare(credentials.password, user.password_hash);
+            const password_ok = await compare(credentials.password, usuario.contrasena);
             if (!password_ok) throw new Error("Contraseña incorrecta");
 
-            return { id: user.id, nombre: user.nombre, email: user.email, rol: user.rol };
+            return { id: usuario.id, nombre: usuario.nombre, email: usuario.email, rol: usuario.rol };
         },
         }),
     ],
@@ -46,11 +46,13 @@ export const authOptions = {
             token.id = user.id;
             token.rol = user.rol;
             token.nombre = user.nombre;
+            token.email = user.email;
         }
         return token;
         },
         async session({ session, token }) {
         if (token) {
+            session.user = session.user || {};
             session.user.id = token.id;
             session.user.rol = token.rol;
             session.user.nombre = token.nombre;
