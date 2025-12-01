@@ -16,7 +16,7 @@ const api_fetch = async (url, body = {}) => {
     return data
 }
 
-export default function Home({ u_id, u_nombre, u_rol }) {
+export default function Home({ u_nombre, u_rol }) {
     const search_params = useSearchParams()
     const [mensaje, set_mensaje] = useState("")
     const [mostrar_opciones, set_mostrar_opciones] = useState(false)
@@ -24,22 +24,8 @@ export default function Home({ u_id, u_nombre, u_rol }) {
     const [cargando, set_cargando] = useState(false)
     const [enviando, set_enviando] = useState(false)
     const [error, set_error] = useState("")
-    const [inspecciones, set_inspecciones] = useState([])
-    const [canales, set_canales] = useState([])
-    const [inspeccion_activa, set_inspeccion_activa] = useState("")
     const [canal_activo, set_canal_activo] = useState("")
-    const [nueva_inspeccion, set_nueva_inspeccion] = useState({ nombre: "", codigo: "", obra_id: "" })
-    const [nuevo_canal, set_nuevo_canal] = useState({ nombre: "", descripcion: "" })
-    const [obras, set_obras] = useState([])
-    const [nueva_obra, set_nueva_obra] = useState({
-        nombre_obra: "",
-        tipo_obra: "obra",
-        estado: "en_progreso",
-        fecha_inicio: "",
-        fecha_fin: "",
-        descripcion: ""
-    })
-
+    
     const canal_id = useMemo(() => {
         if (canal_activo) return canal_activo
         const desde_url = search_params.get("canal_id")
@@ -65,109 +51,7 @@ export default function Home({ u_id, u_nombre, u_rol }) {
         cargar_mensajes()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [canal_id])
-
-    const cargar_inspecciones = async () => {
-        try {
-            const { inspecciones } = await api_fetch("/api/chat/listar_inspecciones", { limit: 50 })
-            set_inspecciones(inspecciones || [])
-        } catch (err) {
-            set_error(err.message || "No se pudo cargar inspecciones")
-        }
-    }
-
-    const cargar_canales = async (inspeccion_id) => {
-        if (!inspeccion_id) return
-        try {
-            const { canales: canales_res } = await api_fetch("/api/chat/listar_canales_inspeccion", { inspeccion_id })
-            set_canales(canales_res || [])
-        } catch (err) {
-            set_error(err.message || "No se pudo cargar canales")
-        }
-    }
-
-    useEffect(() => {
-        cargar_inspecciones()
-        cargar_obras()
-    }, [])
-
-    const cargar_obras = async () => {
-        try {
-            const { obras } = await api_fetch("/api/chat/listar_obras", { limit: 50 })
-            set_obras(obras || [])
-        } catch (err) {
-            set_error(err.message || "No se pudo cargar obras")
-        }
-    }
-
-    const crear_obra = async () => {
-        const hoy = new Date().toISOString().slice(0, 10)
-        const payload = {
-            ...nueva_obra,
-            fecha_inicio: nueva_obra.fecha_inicio || hoy,
-            fecha_fin: nueva_obra.fecha_fin || hoy
-        }
-        if (!payload.nombre_obra) {
-            set_error("Ingresa nombre de la obra")
-            return
-        }
-        try {
-            await api_fetch("/api/chat/crear_obra", payload)
-            set_nueva_obra({
-                nombre_obra: "",
-                tipo_obra: "obra",
-                estado: "en_progreso",
-                fecha_inicio: "",
-                fecha_fin: "",
-                descripcion: ""
-            })
-            await cargar_obras()
-        } catch (err) {
-            set_error(err.message || "No se pudo crear obra")
-        }
-    }
-
-    const crear_inspeccion = async () => {
-        try {
-            // set_error("")
-            await api_fetch("/api/chat/crear_inspeccion", {
-                codigo: nueva_inspeccion.codigo || `INS-${Date.now()}`,
-                revision: 1,
-                fecha_formulario: new Date().toISOString(),
-                fecha_inspeccion: new Date().toISOString(),
-                hora_inicio: new Date().toISOString(),
-                hora_termino: new Date().toISOString(),
-                encargado_id: u_id,
-                obra_id: nueva_inspeccion.obra_id || null,
-                participantes: nueva_inspeccion.nombre || u_nombre || "equipo",
-                visita: 1
-            })
-            set_nueva_inspeccion({ nombre: "", codigo: "", obra_id: "" })
-            await cargar_inspecciones()
-        } catch (err) {
-            set_error(err.message || "No se pudo crear inspección")
-        }
-    }
-
-    const crear_canal = async () => {
-        if (!inspeccion_activa) {
-            set_error("Primero selecciona una inspección")
-            return
-        }
-        try {
-            set_error("")
-            await api_fetch("/api/chat/crear_canal", {
-                inspeccion_id: inspeccion_activa,
-                nombre: nuevo_canal.nombre || "Canal",
-                descripcion: nuevo_canal.descripcion || "",
-                usuarios_ids: []
-            })
-            set_nuevo_canal({ nombre: "", descripcion: "" })
-            await cargar_canales(inspeccion_activa)
-        } catch (err) {
-            set_error(err.message || "No se pudo crear canal")
-        }
-    }
-
+    
     const manejar_enviar_mensaje = async () => {
         if (!mensaje.trim() || !canal_id) return
         try {
@@ -210,119 +94,7 @@ export default function Home({ u_id, u_nombre, u_rol }) {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 flex-1 min-h-0 -mt-15">
-                    <div className="rounded-2xl bg-[#ebe9f4] dark:bg-[#28223f] border border-[#d3d2de] dark:border-[#312b48] p-4 space-y-3 overflow-y-auto">
-                        <p className="text-sm font-semibold text-[#1f1b2f] dark:text-white">Flujo: inspección → canal → chat</p>
-
-                        <div className="space-y-2">
-                            <p className="text-xs text-[#5a556c] dark:text-[#c7c4d6]">0. Crea una obra para vincular.</p>
-                            <input
-                                type="text"
-                                placeholder="Nombre de la obra"
-                                value={nueva_obra.nombre_obra}
-                                onChange={(e) => set_nueva_obra({ ...nueva_obra, nombre_obra: e.target.value })}
-                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
-                            />
-                            <textarea
-                                placeholder="Descripción"
-                                value={nueva_obra.descripcion}
-                                onChange={(e) => set_nueva_obra({ ...nueva_obra, descripcion: e.target.value })}
-                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
-                            />
-                            <div className="grid grid-cols-2 gap-2">
-                                <input
-                                    type="date"
-                                    value={nueva_obra.fecha_inicio}
-                                    onChange={(e) => set_nueva_obra({ ...nueva_obra, fecha_inicio: e.target.value })}
-                                    className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
-                                />
-                                <input
-                                    type="date"
-                                    value={nueva_obra.fecha_fin}
-                                    onChange={(e) => set_nueva_obra({ ...nueva_obra, fecha_fin: e.target.value })}
-                                    className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
-                                />
-                            </div>
-                            <Button className="w-full bg-[#6f668e] hover:bg-[#7d759f]" onClick={crear_obra}>
-                                Crear obra
-                            </Button>
-                            <select
-                                value={nueva_inspeccion.obra_id}
-                                onChange={(e) => set_nueva_inspeccion({ ...nueva_inspeccion, obra_id: e.target.value })}
-                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
-                            >
-                                <option value="">Selecciona obra para inspección</option>
-                                {obras.map((o) => (
-                                    <option key={o.id} value={o.id}>{o.nombre_obra}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="space-y-2">
-                            <p className="text-xs text-[#5a556c] dark:text-[#c7c4d6]">1. Crea una inspección (ej. formulario de la imagen).</p>
-                            <input
-                                type="text"
-                                placeholder="Nombre/participantes"
-                                value={nueva_inspeccion.nombre}
-                                onChange={(e) => set_nueva_inspeccion({ ...nueva_inspeccion, nombre: e.target.value })}
-                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Código (opcional)"
-                                value={nueva_inspeccion.codigo}
-                                onChange={(e) => set_nueva_inspeccion({ ...nueva_inspeccion, codigo: e.target.value })}
-                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
-                            />
-                            <Button className="w-full bg-[#f6a020] hover:bg-[#e59210]" onClick={crear_inspeccion}>
-                                Crear inspección
-                            </Button>
-                        </div>
-
-                        <div className="space-y-2">
-                            <p className="text-xs text-[#5a556c] dark:text-[#c7c4d6]">2. Elige inspección y crea canal.</p>
-                            <select
-                                value={inspeccion_activa}
-                                onChange={async (e) => { 
-                                    set_inspeccion_activa(e.target.value)
-                                    set_canal_activo("")
-                                    await cargar_canales(e.target.value)
-                                }}
-                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
-                            >
-                                <option value="">Selecciona inspección</option>
-                                {inspecciones.map((ins) => (
-                                    <option key={ins.id} value={ins.id}>{ins.codigo || ins.id.slice(0, 6)}</option>
-                                ))}
-                            </select>
-                            <input
-                                type="text"
-                                placeholder="Nombre canal"
-                                value={nuevo_canal.nombre}
-                                onChange={(e) => set_nuevo_canal({ ...nuevo_canal, nombre: e.target.value })}
-                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
-                            />
-                            <Button className="w-full bg-[#6f668e] hover:bg-[#7d759f]" onClick={crear_canal}>
-                                Crear canal
-                            </Button>
-                        </div>
-
-                        <div className="space-y-2">
-                            <p className="text-xs text-[#5a556c] dark:text-[#c7c4d6]">3. Selecciona canal para abrir chat.</p>
-                            <div className="space-y-2 max-h-52 overflow-y-auto">
-                                {canales.length === 0 && <p className="text-xs text-[#8f8aa0]">Sin canales</p>}
-                                {canales.map((c) => (
-                                    <button
-                                        key={c.id}
-                                        onClick={() => set_canal_activo(c.id)}
-                                        className={`w-full text-left px-3 py-2 rounded-lg border text-sm ${canal_activo === c.id ? "bg-[#f6a020] text-white border-[#f6a020]" : "bg-white dark:bg-[#1f1a31] border-[#d3d2de] dark:border-[#312b48] text-[#1f1b2f] dark:text-white"}`}
-                                    >
-                                        {c.nombre || c.id.slice(0, 6)}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+                <div className="grid grid-cols-1 gap-4 flex-1 min-h-0 -mt-15">
 
                     <div className="flex flex-col justify-end gap-3 pb-6">
                         <div className="flex flex-col gap-3 overflow-y-auto pr-1 max-h-[55vh]">

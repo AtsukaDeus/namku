@@ -9,5 +9,5 @@ export default async function HomePage() {
     const user_role = await session.user?.rol;
     if (user_role != 'prevencionista' && user_role != 'admin') redirect("/");       
 
-    return <Home u_id={session.user.id} u_nombre={session.user.nombre} u_rol={user_role} />;
+    return <Home u_nombre={session.user.nombre} u_rol={user_role} />;
 }

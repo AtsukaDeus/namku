@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { ChevronLeft, CirclePlus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useSession } from "next-auth/react"
 
 const api_fetch = async (url, body = {}) => {
     const res = await fetch(url, {
@@ -19,30 +20,31 @@ const api_fetch = async (url, body = {}) => {
 }
 
 export function Sidebar({ isCollapsed, onToggle }) {
+    const { data: session } = useSession()
     const router = useRouter()
     const [inspecciones, set_inspecciones] = useState([])
     const [canales, set_canales] = useState([])
     const [inspeccion_activa, set_inspeccion_activa] = useState("")
+    const [canal_activo, set_canal_activo] = useState("")
     const [cargando, set_cargando] = useState(false)
     const [error, set_error] = useState("")
     const [mostrar_form, set_mostrar_form] = useState(false)
-    const [form_inspeccion, set_form_inspeccion] = useState({
-        obra_id: "",
-        codigo: "",
-        fecha_inspeccion: "",
-        hora_inicio: "",
-        hora_termino: "",
-        participantes: ""
+    const [obras, set_obras] = useState([])
+    const [nueva_inspeccion, set_nueva_inspeccion] = useState({ nombre: "", codigo: "", obra_id: "" })
+    const [nuevo_canal, set_nuevo_canal] = useState({ nombre: "", descripcion: "" })
+    const [nueva_obra, set_nueva_obra] = useState({
+        nombre_obra: "",
+        tipo_obra: "obra",
+        estado: "en_progreso",
+        fecha_inicio: "",
+        fecha_fin: "",
+        descripcion: ""
     })
 
     const cargar_inspecciones = async () => {
         try {
-            const { inspecciones } = await api_fetch("/api/chat/listar_inspecciones", { limit: 20 })
+            const { inspecciones } = await api_fetch("/api/chat/listar_inspecciones", { limit: 50 })
             set_inspecciones(inspecciones || [])
-            if (inspecciones?.length && !inspeccion_activa) {
-                set_inspeccion_activa(inspecciones[0].id)
-                await cargar_canales(inspecciones[0].id)
-            }
         } catch (err) {
             set_error(err.message || "No se pudo cargar inspecciones")
         }
@@ -51,65 +53,92 @@ export function Sidebar({ isCollapsed, onToggle }) {
     const cargar_canales = async (inspeccion_id) => {
         if (!inspeccion_id) return
         try {
-            const { canales: c } = await api_fetch("/api/chat/listar_canales_inspeccion", { inspeccion_id })
-            set_canales(c || [])
+            const { canales: canales_res } = await api_fetch("/api/chat/listar_canales_inspeccion", { inspeccion_id })
+            set_canales(canales_res || [])
         } catch (err) {
             set_error(err.message || "No se pudo cargar canales")
         }
     }
 
-    const obras_opciones = useMemo(() => {
-        const uniques = new Map()
-        inspecciones.forEach((ins) => {
-            if (ins.obra_id && !uniques.has(ins.obra_id)) {
-                uniques.set(ins.obra_id, { id: ins.obra_id, nombre_obra: ins.obra_id })
-            }
-        })
-        return Array.from(uniques.values())
-    }, [inspecciones])
-
     useEffect(() => {
         cargar_inspecciones()
+        cargar_obras()
     }, [])
 
-    const crear_inspeccion = async () => {
-        if (!form_inspeccion.obra_id) {
-            set_error("Selecciona obra")
+    const cargar_obras = async () => {
+        try {
+            const { obras } = await api_fetch("/api/chat/listar_obras", { limit: 50 })
+            set_obras(obras || [])
+        } catch (err) {
+            set_error(err.message || "No se pudo cargar obras")
+        }
+    }
+
+    const crear_obra = async () => {
+        const hoy = new Date().toISOString().slice(0, 10)
+        const payload = {
+            ...nueva_obra,
+            fecha_inicio: nueva_obra.fecha_inicio || hoy,
+            fecha_fin: nueva_obra.fecha_fin || hoy
+        }
+        if (!payload.nombre_obra) {
+            set_error("Ingresa nombre de la obra")
             return
         }
         try {
-            set_cargando(true)
-            set_error("")
-            const ahora = new Date().toISOString()
-            const fecha_inspeccion = form_inspeccion.fecha_inspeccion || ahora
-            const hora_inicio = form_inspeccion.hora_inicio || ahora
-            const hora_termino = form_inspeccion.hora_termino || ahora
+            await api_fetch("/api/chat/crear_obra", payload)
+            set_nueva_obra({
+                nombre_obra: "",
+                tipo_obra: "obra",
+                estado: "en_progreso",
+                fecha_inicio: "",
+                fecha_fin: "",
+                descripcion: ""
+            })
+            await cargar_obras()
+        } catch (err) {
+            set_error(err.message || "No se pudo crear obra")
+        }
+    }
+
+    const crear_inspeccion = async () => {
+        try {
             await api_fetch("/api/chat/crear_inspeccion", {
-                codigo: form_inspeccion.codigo || `INS-${Date.now()}`,
+                codigo: nueva_inspeccion.codigo || `INS-${Date.now()}`,
                 revision: 1,
-                fecha_formulario: ahora,
-                fecha_inspeccion,
-                hora_inicio,
-                hora_termino,
-                encargado_id: "autogenerado",
-                obra_id: form_inspeccion.obra_id,
-                participantes: form_inspeccion.participantes || "equipo",
+                fecha_formulario: new Date().toISOString(),
+                fecha_inspeccion: new Date().toISOString(),
+                hora_inicio: new Date().toISOString(),
+                hora_termino: new Date().toISOString(),
+                encargado_id: session.user.id,
+                obra_id: nueva_inspeccion.obra_id || null,
+                participantes: nueva_inspeccion.nombre || session.user.nombre || "equipo",
                 visita: 1
             })
-            set_form_inspeccion({
-                obra_id: "",
-                codigo: "",
-                fecha_inspeccion: "",
-                hora_inicio: "",
-                hora_termino: "",
-                participantes: ""
-            })
-            set_mostrar_form(false)
+            set_nueva_inspeccion({ nombre: "", codigo: "", obra_id: "" })
             await cargar_inspecciones()
         } catch (err) {
             set_error(err.message || "No se pudo crear inspección")
-        } finally {
-            set_cargando(false)
+        }
+    }
+
+    const crear_canal = async () => {
+        if (!inspeccion_activa) {
+            set_error("Primero selecciona una inspección")
+            return
+        }
+        try {
+            set_error("")
+            await api_fetch("/api/chat/crear_canal", {
+                inspeccion_id: inspeccion_activa,
+                nombre: nuevo_canal.nombre || "Canal",
+                descripcion: nuevo_canal.descripcion || "",
+                usuarios_ids: []
+            })
+            set_nuevo_canal({ nombre: "", descripcion: "" })
+            await cargar_canales(inspeccion_activa)
+        } catch (err) {
+            set_error(err.message || "No se pudo crear canal")
         }
     }
 
@@ -120,6 +149,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
     }
 
     const abrir_canal = (canal_id) => {
+        set_canal_activo(canal_id)
         if (!canal_id) return
         router.push(`/namku/home?canal_id=${canal_id}`)
     }
@@ -145,7 +175,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
                 </div>
             </div>
 
-            <div className="p-4 space-y-6">
+            <div className="p-4 space-y-6 max-h-96 overflow-y-auto">
                 <Button
                     className="w-full bg-[#6f668e] hover:bg-[#7d759f] text-white rounded-full py-5 font-semibold shadow-md flex items-center justify-center gap-2 disabled:opacity-60"
                     onClick={() => set_mostrar_form(!mostrar_form)}
@@ -159,53 +189,116 @@ export function Sidebar({ isCollapsed, onToggle }) {
 
                 {!isCollapsed && mostrar_form && (
                     <div className="space-y-2 rounded-lg border border-[#1c1837] bg-[#16122e] p-3">
-                        <p className="text-sm font-semibold">Crear inspección</p>
-                        <input
-                            type="text"
-                            placeholder="Código"
-                            value={form_inspeccion.codigo}
-                            onChange={(e) => set_form_inspeccion({ ...form_inspeccion, codigo: e.target.value })}
-                            className="w-full rounded-md px-3 py-2 bg-[#0f0c23] border border-[#1c1837] text-sm"
-                        />
-                        <select
-                            value={form_inspeccion.obra_id}
-                            onChange={(e) => set_form_inspeccion({ ...form_inspeccion, obra_id: e.target.value })}
-                            className="w-full rounded-md px-3 py-2 bg-[#0f0c23] border border-[#1c1837] text-sm"
-                        >
-                            <option value="">Selecciona obra</option>
-                            {obras_opciones.map((o) => (
-                                <option key={o.id} value={o.id}>{o.nombre_obra}</option>
-                            ))}
-                        </select>
-                        <input
-                            type="date"
-                            value={form_inspeccion.fecha_inspeccion}
-                            onChange={(e) => set_form_inspeccion({ ...form_inspeccion, fecha_inspeccion: e.target.value })}
-                            className="w-full rounded-md px-3 py-2 bg-[#0f0c23] border border-[#1c1837] text-sm"
-                        />
-                        <div className="grid grid-cols-2 gap-2">
+                        <p className="text-sm font-semibold text-[#1f1b2f] dark:text-white">Flujo: inspección → canal → chat</p>
+
+                        <div className="space-y-2">
+                            <p className="text-xs text-[#5a556c] dark:text-[#c7c4d6]">0. Crea una obra para vincular.</p>
                             <input
-                                type="time"
-                                value={form_inspeccion.hora_inicio}
-                                onChange={(e) => set_form_inspeccion({ ...form_inspeccion, hora_inicio: e.target.value })}
-                                className="w-full rounded-md px-3 py-2 bg-[#0f0c23] border border-[#1c1837] text-sm"
+                                type="text"
+                                placeholder="Nombre de la obra"
+                                value={nueva_obra.nombre_obra}
+                                onChange={(e) => set_nueva_obra({ ...nueva_obra, nombre_obra: e.target.value })}
+                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
                             />
-                            <input
-                                type="time"
-                                value={form_inspeccion.hora_termino}
-                                onChange={(e) => set_form_inspeccion({ ...form_inspeccion, hora_termino: e.target.value })}
-                                className="w-full rounded-md px-3 py-2 bg-[#0f0c23] border border-[#1c1837] text-sm"
+                            <textarea
+                                placeholder="Descripción"
+                                value={nueva_obra.descripcion}
+                                onChange={(e) => set_nueva_obra({ ...nueva_obra, descripcion: e.target.value })}
+                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
                             />
+                            <div className="grid grid-cols-2 gap-2">
+                                <input
+                                    type="date"
+                                    value={nueva_obra.fecha_inicio}
+                                    onChange={(e) => set_nueva_obra({ ...nueva_obra, fecha_inicio: e.target.value })}
+                                    className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                                />
+                                <input
+                                    type="date"
+                                    value={nueva_obra.fecha_fin}
+                                    onChange={(e) => set_nueva_obra({ ...nueva_obra, fecha_fin: e.target.value })}
+                                    className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                                />
+                            </div>
+                            <Button className="w-full bg-[#6f668e] hover:bg-[#7d759f]" onClick={crear_obra}>
+                                Crear obra
+                            </Button>
+                            <select
+                                value={nueva_inspeccion.obra_id}
+                                onChange={(e) => set_nueva_inspeccion({ ...nueva_inspeccion, obra_id: e.target.value })}
+                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                            >
+                                <option value="">Selecciona obra para inspección</option>
+                                {obras.map((o) => (
+                                    <option key={o.id} value={o.id}>{o.nombre_obra}</option>
+                                ))}
+                            </select>
                         </div>
-                        <textarea
-                            placeholder="Participantes"
-                            value={form_inspeccion.participantes}
-                            onChange={(e) => set_form_inspeccion({ ...form_inspeccion, participantes: e.target.value })}
-                            className="w-full rounded-md px-3 py-2 bg-[#0f0c23] border border-[#1c1837] text-sm"
-                        />
-                        <Button className="w-full bg-[#f6a020] hover:bg-[#e59210]" onClick={crear_inspeccion} disabled={cargando}>
-                            Guardar inspección
-                        </Button>
+
+                        <div className="space-y-2">
+                            <p className="text-xs text-[#5a556c] dark:text-[#c7c4d6]">1. Crea una inspección (ej. formulario de la imagen).</p>
+                            <input
+                                type="text"
+                                placeholder="Nombre/participantes"
+                                value={nueva_inspeccion.nombre}
+                                onChange={(e) => set_nueva_inspeccion({ ...nueva_inspeccion, nombre: e.target.value })}
+                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                            />
+                            <input
+                                type="text"
+                                placeholder="Código (opcional)"
+                                value={nueva_inspeccion.codigo}
+                                onChange={(e) => set_nueva_inspeccion({ ...nueva_inspeccion, codigo: e.target.value })}
+                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                            />
+                            <Button className="w-full bg-[#f6a020] hover:bg-[#e59210]" onClick={crear_inspeccion}>
+                                Crear inspección
+                            </Button>
+                        </div>
+
+                        <div className="space-y-2">
+                            <p className="text-xs text-[#5a556c] dark:text-[#c7c4d6]">2. Elige inspección y crea canal.</p>
+                            <select
+                                value={inspeccion_activa}
+                                onChange={async (e) => { 
+                                    set_inspeccion_activa(e.target.value)
+                                    set_canal_activo("")
+                                    await cargar_canales(e.target.value)
+                                }}
+                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                            >
+                                <option value="">Selecciona inspección</option>
+                                {inspecciones.map((ins) => (
+                                    <option key={ins.id} value={ins.id}>{ins.codigo || ins.id.slice(0, 6)}</option>
+                                ))}
+                            </select>
+                            <input
+                                type="text"
+                                placeholder="Nombre canal"
+                                value={nuevo_canal.nombre}
+                                onChange={(e) => set_nuevo_canal({ ...nuevo_canal, nombre: e.target.value })}
+                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                            />
+                            <Button className="w-full bg-[#6f668e] hover:bg-[#7d759f]" onClick={crear_canal}>
+                                Crear canal
+                            </Button>
+                        </div>
+
+                        <div className="space-y-2">
+                            <p className="text-xs text-[#5a556c] dark:text-[#c7c4d6]">3. Selecciona canal para abrir chat.</p>
+                            <div className="space-y-2 max-h-52 overflow-y-auto">
+                                {canales.length === 0 && <p className="text-xs text-[#8f8aa0]">Sin canales</p>}
+                                {canales.map((c) => (
+                                    <button
+                                        key={c.id}
+                                        onClick={() => abrir_canal(c.id)}
+                                        className={`w-full text-left px-3 py-2 rounded-lg border text-sm ${canal_activo === c.id ? "bg-[#f6a020] text-white border-[#f6a020]" : "bg-white dark:bg-[#1f1a31] border-[#d3d2de] dark:border-[#312b48] text-[#1f1b2f] dark:text-white"}`}
+                                    >
+                                        {c.nombre || c.id.slice(0, 6)}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -237,7 +330,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
                             <button
                                 key={c.id}
                                 onClick={() => abrir_canal(c.id)}
-                                className="w-full text-left px-3 py-2 rounded-lg text-sm border bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"
+                                className={`w-full text-left px-3 py-2 rounded-lg text-sm border ${canal_activo === c.id ? "bg-[#f6a020] text-[#0a071f] border-[#f6a020]" : "bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"}`}
                             >
                                 {c.nombre || c.id.slice(0, 6)}
                             </button>
