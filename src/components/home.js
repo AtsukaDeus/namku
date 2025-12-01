@@ -16,7 +16,7 @@ const api_fetch = async (url, body = {}) => {
     return data
 }
 
-export default function Home({ u_nombre, u_rol }) {
+export default function Home({ u_id, u_nombre, u_rol }) {
     const search_params = useSearchParams()
     const [mensaje, set_mensaje] = useState("")
     const [mostrar_opciones, set_mostrar_opciones] = useState(false)
@@ -128,7 +128,7 @@ export default function Home({ u_nombre, u_rol }) {
 
     const crear_inspeccion = async () => {
         try {
-            set_error("")
+            // set_error("")
             await api_fetch("/api/chat/crear_inspeccion", {
                 codigo: nueva_inspeccion.codigo || `INS-${Date.now()}`,
                 revision: 1,
@@ -136,7 +136,7 @@ export default function Home({ u_nombre, u_rol }) {
                 fecha_inspeccion: new Date().toISOString(),
                 hora_inicio: new Date().toISOString(),
                 hora_termino: new Date().toISOString(),
-                encargado_id: u_nombre || "usuario",
+                encargado_id: u_id,
                 obra_id: nueva_inspeccion.obra_id || null,
                 participantes: nueva_inspeccion.nombre || u_nombre || "equipo",
                 visita: 1

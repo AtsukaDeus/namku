@@ -68,7 +68,7 @@ export function Navbar({ onMenuClick }) {
                             <Image src="/logo-namku.png" alt="Namku" width={64} height={64} priority />
                         </div>
                         <span className="hidden md:inline-block font-semibold text-2xl text-[#1f1b2f] dark:text-[#f6f5fb]">
-                            Namku <span className="text-sm ml-4">Developed by @AtsukaDeuss {`(Versión 1.0)`}</span>
+                            Namku <span className="text-sm ml-4">{`(Versión 1.0)`}</span>
                         </span>
                     </Link>
                 </div>
