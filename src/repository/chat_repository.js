@@ -192,3 +192,30 @@ export async function listar_obras_repo(limit = 50) {
     `
     return await query(sql)
 }
+
+export async function borrar_canal_repo(canal_id) {
+    const sql = `
+        DELETE FROM canales
+	    WHERE id=$1
+    `
+    const res = await query(sql, [canal_id])
+    return res?.[0]
+}
+
+export async function borrar_inspeccion_repo(inspeccion_id) {
+    const sql = `
+        DELETE FROM inspecciones
+	    WHERE id=$1
+    `
+    const res = await query(sql, [inspeccion_id])
+    return res?.[0]
+}
+
+export async function borrar_obra_repo(obra_id) {
+    const sql = `
+        DELETE FROM obras
+	    WHERE id=$1
+    `
+    const res = await query(sql, [obra_id])
+    return res?.[0]
+}

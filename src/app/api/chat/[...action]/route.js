@@ -7,6 +7,9 @@ import * as listar_inspecciones from "../routes/listar_inspecciones"
 import * as listar_canales_inspeccion from "../routes/listar_canales_inspeccion"
 import * as crear_obra from "../routes/crear_obra"
 import * as listar_obras from "../routes/listar_obras"
+import * as borrar_obra from "../routes/borrar_obra"
+import * as borrar_inspeccion from "../routes/borrar_inspeccion"
+import * as borrar_canal from "../routes/borrar_canal"
 
 export async function POST(req, { params }) {
     const { action } = await params
@@ -20,6 +23,9 @@ export async function POST(req, { params }) {
     if (action_path === "listar_canales_inspeccion") return listar_canales_inspeccion.POST(req)
     if (action_path === "crear_obra") return crear_obra.POST(req)
     if (action_path === "listar_obras") return listar_obras.POST(req)
+    if (action_path === "borrar_obra") return borrar_obra.POST(req)
+    if (action_path === "borrar_inspeccion") return borrar_inspeccion.POST(req)
+    if (action_path === "borrar_canal") return borrar_canal.POST(req)
 
     return NextResponse.json({ error: "Ruta no encontrada", action }, { status: 404 })
 }

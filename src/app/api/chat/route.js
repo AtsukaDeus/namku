@@ -14,7 +14,10 @@ export async function GET() {
                 "/listar_inspecciones",
                 "/listar_canales_inspeccion",
                 "/crear_obra",
-                "/listar_obras"
+                "/listar_obras",
+                "/borrar_obra",
+                "/borrar_inspeccion",
+                "/borrar_canal"
             ]
         }
     })

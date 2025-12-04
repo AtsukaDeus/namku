@@ -10,7 +10,10 @@ import {
     obtener_inspecciones_repo,
     obtener_canales_por_inspeccion_repo,
     crear_obra_repo,
-    listar_obras_repo
+    listar_obras_repo,
+    borrar_canal_repo,
+    borrar_inspeccion_repo,
+    borrar_obra_repo
 } from "@/repository/chat_repository"
 
 const es_uuid = (valor) => /^[0-9a-fA-F-]{36}$/.test(String(valor || "").trim())
@@ -137,4 +140,19 @@ export async function listar_obras_service(limit = 50) {
     if (!session) return { error: "No autorizado", status: 401 }
     const obras = await listar_obras_repo(limit)
     return { data: { obras }, status: 200 }
+}
+
+export async function borrar_obra_service() {
+    const session = await get_session()
+    if (!session) return { error: "No autorizado", status: 401 }
+}
+
+export async function borrar_inspeccion_service() {
+    const session = await get_session()
+    if (!session) return { error: "No autorizado", status: 401 }
+}
+
+export async function borrar_canal_service() {
+    const session = await get_session()
+    if (!session) return { error: "No autorizado", status: 401 }
 }

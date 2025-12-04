@@ -154,6 +154,22 @@ export function Sidebar({ isCollapsed, onToggle }) {
         router.push(`/namku/home?canal_id=${canal_id}`)
     }
 
+    const borrar_inspeccion = async (id) => {
+        try {
+            await api_fetch("/api/chat/borrar_inspeccion", {id})
+        } catch (error) {
+            set_error(error.message || "No se pudo borrar la inspección")
+        }
+    }
+
+    const borrar_canal = async (id) => {
+        try {
+            await api_fetch("/api/chat/borrar_canal", {id})
+        } catch (error) {
+            set_error(error.message || "No se pudo borrar el canal")
+        }
+    }
+
     return (
         <aside
             className={cn(
