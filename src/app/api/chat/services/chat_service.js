@@ -142,17 +142,29 @@ export async function listar_obras_service(limit = 50) {
     return { data: { obras }, status: 200 }
 }
 
-export async function borrar_obra_service() {
+export async function borrar_obra_service(payload) {
     const session = await get_session()
     if (!session) return { error: "No autorizado", status: 401 }
+    const { obra_id } = payload || {}
+    if (!obra_id) return { error: "obra_id requerido", status: 400 }
+    const obra = await borrar_obra_repo(obra_id)
+    return { data: { obra }, status: 200 }
 }
 
-export async function borrar_inspeccion_service() {
+export async function borrar_inspeccion_service(payload) {
     const session = await get_session()
     if (!session) return { error: "No autorizado", status: 401 }
+    const { inspeccion_id } = payload || {}
+    if (!inspeccion_id) return { error: "inspeccion_id requerido", status: 400 }
+    const inspeccion = await borrar_inspeccion_repo(inspeccion_id)
+    return { data: { inspeccion }, status: 200 }
 }
 
-export async function borrar_canal_service() {
+export async function borrar_canal_service(payload) {
     const session = await get_session()
     if (!session) return { error: "No autorizado", status: 401 }
+    const { canal_id } = payload || {}
+    if (!canal_id) return { error: "canal_id requerido", status: 400 }
+    const canal = await borrar_canal_repo(canal_id)
+    return { data: { canal }, status: 200 }
 }

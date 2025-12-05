@@ -154,17 +154,17 @@ export function Sidebar({ isCollapsed, onToggle }) {
         router.push(`/namku/home?canal_id=${canal_id}`)
     }
 
-    const borrar_inspeccion = async (id) => {
+    const borrar_inspeccion = async (inspeccion_id) => {
         try {
-            await api_fetch("/api/chat/borrar_inspeccion", {id})
+            await api_fetch("/api/chat/borrar_inspeccion", {inspeccion_id})
         } catch (error) {
             set_error(error.message || "No se pudo borrar la inspección")
         }
     }
 
-    const borrar_canal = async (id) => {
+    const borrar_canal = async (canal_id) => {
         try {
-            await api_fetch("/api/chat/borrar_canal", {id})
+            await api_fetch("/api/chat/borrar_canal", {canal_id})
         } catch (error) {
             set_error(error.message || "No se pudo borrar el canal")
         }
@@ -326,13 +326,22 @@ export function Sidebar({ isCollapsed, onToggle }) {
                                 key={ins.id}
                                 onClick={() => on_select_inspeccion(ins.id)}
                                 className={cn(
-                                    "w-full text-left px-3 py-2 rounded-lg text-sm border",
+                                    "w-4/5 text-left px-3 py-2 rounded-lg text-sm border",
                                     inspeccion_activa === ins.id
                                         ? "bg-[#f6a020] text-[#0a071f] border-[#f6a020]"
                                         : "bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"
                                 )}
                             >
                                 {ins.codigo || ins.id.slice(0, 6)}
+                            </button>
+                        ))}
+                        {inspecciones.map((ins) => (
+                            <button
+                                key={ins.id}
+                                onClick={() => borrar_inspeccion(ins.id)}
+                                className="w-1/5 text-left px-3 py-2 rounded-lg text-sm border bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"
+                            >
+                                B
                             </button>
                         ))}
                         {inspecciones.length === 0 && <div className="text-xs text-[#8f8aa0]">Sin inspecciones</div>}
@@ -346,9 +355,18 @@ export function Sidebar({ isCollapsed, onToggle }) {
                             <button
                                 key={c.id}
                                 onClick={() => abrir_canal(c.id)}
-                                className={`w-full text-left px-3 py-2 rounded-lg text-sm border ${canal_activo === c.id ? "bg-[#f6a020] text-[#0a071f] border-[#f6a020]" : "bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"}`}
+                                className={`w-4/5 text-left px-3 py-2 rounded-lg text-sm border ${canal_activo === c.id ? "bg-[#f6a020] text-[#0a071f] border-[#f6a020]" : "bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"}`}
                             >
                                 {c.nombre || c.id.slice(0, 6)}
+                            </button>
+                        ))}
+                        {canales.map((c) => (
+                            <button
+                                key={c.id}
+                                onClick={() => borrar_canal(c.id)}
+                                className="w-1/5 text-left px-3 py-2 rounded-lg text-sm border bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"
+                            >
+                                B
                             </button>
                         ))}
                         {canales.length === 0 && <div className="text-xs text-[#8f8aa0]">Selecciona inspección</div>}
