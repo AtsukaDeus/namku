@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { ChevronLeft, CirclePlus, Search } from "lucide-react"
+import { ChevronLeft, CirclePlus, Search, Trash, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useSession } from "next-auth/react"
 
@@ -346,7 +346,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
                                 onClick={() => borrar_inspeccion(ins.id)}
                                 className="w-full text-left px-3 py-2 rounded-lg text-sm border bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"
                             >
-                                B
+                                <Trash2 className="w-full h-4 w-4"/>
                             </button>
                         ))}
                         </div>
@@ -375,7 +375,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
                                 onClick={() => borrar_canal(c.id)}
                                 className="w-full text-left px-3 py-2 rounded-lg text-sm border bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"
                             >
-                                B
+                                <Trash2 className="w-full h-4 w-4"/>
                             </button>
                         ))}
                         </div>
