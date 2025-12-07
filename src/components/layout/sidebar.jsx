@@ -157,6 +157,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
     const borrar_inspeccion = async (inspeccion_id) => {
         try {
             await api_fetch("/api/chat/borrar_inspeccion", {inspeccion_id})
+            await cargar_inspecciones()
         } catch (error) {
             set_error(error.message || "No se pudo borrar la inspección")
         }
@@ -165,6 +166,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
     const borrar_canal = async (canal_id) => {
         try {
             await api_fetch("/api/chat/borrar_canal", {canal_id})
+            await cargar_canales(inspeccion_activa)
         } catch (error) {
             set_error(error.message || "No se pudo borrar el canal")
         }
@@ -205,35 +207,35 @@ export function Sidebar({ isCollapsed, onToggle }) {
 
                 {!isCollapsed && mostrar_form && (
                     <div className="space-y-2 rounded-lg border border-[#1c1837] bg-[#16122e] p-3">
-                        <p className="text-sm font-semibold text-[#1f1b2f] dark:text-white">Flujo: inspección → canal → chat</p>
+                        <p className="text-sm font-semibold text-white">Flujo: inspección → canal → chat</p>
 
                         <div className="space-y-2">
-                            <p className="text-xs text-[#5a556c] dark:text-[#c7c4d6]">0. Crea una obra para vincular.</p>
+                            <p className="text-xs text-[#c7c4d6]">0. Crea una obra para vincular.</p>
                             <input
                                 type="text"
                                 placeholder="Nombre de la obra"
                                 value={nueva_obra.nombre_obra}
                                 onChange={(e) => set_nueva_obra({ ...nueva_obra, nombre_obra: e.target.value })}
-                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                                className="w-full rounded-lg px-3 py-2 bg-[#1f1a31] border border-[#312b48] text-sm"
                             />
                             <textarea
                                 placeholder="Descripción"
                                 value={nueva_obra.descripcion}
                                 onChange={(e) => set_nueva_obra({ ...nueva_obra, descripcion: e.target.value })}
-                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                                className="w-full rounded-lg px-3 py-2 bg-[#1f1a31] border border-[#312b48] text-sm"
                             />
                             <div className="grid grid-cols-2 gap-2">
                                 <input
                                     type="date"
                                     value={nueva_obra.fecha_inicio}
                                     onChange={(e) => set_nueva_obra({ ...nueva_obra, fecha_inicio: e.target.value })}
-                                    className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                                    className="w-full rounded-lg px-3 py-2 bg-[#1f1a31] border border-[#312b48] text-sm"
                                 />
                                 <input
                                     type="date"
                                     value={nueva_obra.fecha_fin}
                                     onChange={(e) => set_nueva_obra({ ...nueva_obra, fecha_fin: e.target.value })}
-                                    className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                                    className="w-full rounded-lg px-3 py-2 bg-[#1f1a31] border border-[#312b48] text-sm"
                                 />
                             </div>
                             <Button className="w-full bg-[#6f668e] hover:bg-[#7d759f]" onClick={crear_obra}>
@@ -242,7 +244,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
                             <select
                                 value={nueva_inspeccion.obra_id}
                                 onChange={(e) => set_nueva_inspeccion({ ...nueva_inspeccion, obra_id: e.target.value })}
-                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                                className="w-full rounded-lg px-3 py-2 bg-[#1f1a31] border border-[#312b48] text-sm"
                             >
                                 <option value="">Selecciona obra para inspección</option>
                                 {obras.map((o) => (
@@ -252,20 +254,20 @@ export function Sidebar({ isCollapsed, onToggle }) {
                         </div>
 
                         <div className="space-y-2">
-                            <p className="text-xs text-[#5a556c] dark:text-[#c7c4d6]">1. Crea una inspección (ej. formulario de la imagen).</p>
+                            <p className="text-xs text-[#c7c4d6]">1. Crea una inspección (ej. formulario de la imagen).</p>
                             <input
                                 type="text"
                                 placeholder="Nombre/participantes"
                                 value={nueva_inspeccion.nombre}
                                 onChange={(e) => set_nueva_inspeccion({ ...nueva_inspeccion, nombre: e.target.value })}
-                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                                className="w-full rounded-lg px-3 py-2 bg-[#1f1a31] border border-[#312b48] text-sm"
                             />
                             <input
                                 type="text"
                                 placeholder="Código (opcional)"
                                 value={nueva_inspeccion.codigo}
                                 onChange={(e) => set_nueva_inspeccion({ ...nueva_inspeccion, codigo: e.target.value })}
-                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                                className="w-full rounded-lg px-3 py-2 bg-[#1f1a31] border border-[#312b48] text-sm"
                             />
                             <Button className="w-full bg-[#f6a020] hover:bg-[#e59210]" onClick={crear_inspeccion}>
                                 Crear inspección
@@ -273,7 +275,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
                         </div>
 
                         <div className="space-y-2">
-                            <p className="text-xs text-[#5a556c] dark:text-[#c7c4d6]">2. Elige inspección y crea canal.</p>
+                            <p className="text-xs text-[#c7c4d6]">2. Elige inspección y crea canal.</p>
                             <select
                                 value={inspeccion_activa}
                                 onChange={async (e) => { 
@@ -281,7 +283,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
                                     set_canal_activo("")
                                     await cargar_canales(e.target.value)
                                 }}
-                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                                className="w-full rounded-lg px-3 py-2 bg-[#1f1a31] border border-[#312b48] text-sm"
                             >
                                 <option value="">Selecciona inspección</option>
                                 {inspecciones.map((ins) => (
@@ -293,7 +295,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
                                 placeholder="Nombre canal"
                                 value={nuevo_canal.nombre}
                                 onChange={(e) => set_nuevo_canal({ ...nuevo_canal, nombre: e.target.value })}
-                                className="w-full rounded-lg px-3 py-2 bg-white dark:bg-[#1f1a31] border border-[#d3d2de] dark:border-[#312b48] text-sm"
+                                className="w-full rounded-lg px-3 py-2 bg-[#1f1a31] border border-[#312b48] text-sm"
                             />
                             <Button className="w-full bg-[#6f668e] hover:bg-[#7d759f]" onClick={crear_canal}>
                                 Crear canal
@@ -301,7 +303,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
                         </div>
 
                         <div className="space-y-2">
-                            <p className="text-xs text-[#5a556c] dark:text-[#c7c4d6]">3. Selecciona canal para abrir chat.</p>
+                            <p className="text-xs text-[#c7c4d6]">3. Selecciona canal para abrir chat.</p>
                             <div className="space-y-2 max-h-52 overflow-y-auto">
                                 {canales.length === 0 && <p className="text-xs text-[#8f8aa0]">Sin canales</p>}
                                 {canales.map((c) => (
@@ -320,13 +322,14 @@ export function Sidebar({ isCollapsed, onToggle }) {
 
                 <div className="space-y-3">
                     {!isCollapsed && <p className="text-sm uppercase tracking-[0.08em] text-[#c7c4d6]">Inspecciones</p>}
-                    <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                    <div className="space-y-2 max-h-40 overflow-y-auto pr-1 flex">
+                        <div className="w-4/5">
                         {inspecciones.map((ins) => (
                             <button
                                 key={ins.id}
                                 onClick={() => on_select_inspeccion(ins.id)}
                                 className={cn(
-                                    "w-4/5 text-left px-3 py-2 rounded-lg text-sm border",
+                                    "w-full text-left px-3 py-2 rounded-lg text-sm border",
                                     inspeccion_activa === ins.id
                                         ? "bg-[#f6a020] text-[#0a071f] border-[#f6a020]"
                                         : "bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"
@@ -335,41 +338,48 @@ export function Sidebar({ isCollapsed, onToggle }) {
                                 {ins.codigo || ins.id.slice(0, 6)}
                             </button>
                         ))}
+                        </div>
+                        <div className="w-1/5">
                         {inspecciones.map((ins) => (
                             <button
                                 key={ins.id}
                                 onClick={() => borrar_inspeccion(ins.id)}
-                                className="w-1/5 text-left px-3 py-2 rounded-lg text-sm border bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"
+                                className="w-full text-left px-3 py-2 rounded-lg text-sm border bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"
                             >
                                 B
                             </button>
                         ))}
-                        {inspecciones.length === 0 && <div className="text-xs text-[#8f8aa0]">Sin inspecciones</div>}
+                        </div>
+                        {inspecciones.length === 0 && <div className="w-full text-xs text-[#8f8aa0]">Sin inspecciones</div>}
                     </div>
                 </div>
 
                 <div className="space-y-3">
                     {!isCollapsed && <p className="text-sm uppercase tracking-[0.08em] text-[#c7c4d6]">Canales</p>}
-                    <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                    <div className="space-y-2 max-h-40 overflow-y-auto pr-1 flex">
+                        <div className="w-4/5">
                         {canales.map((c) => (
                             <button
                                 key={c.id}
                                 onClick={() => abrir_canal(c.id)}
-                                className={`w-4/5 text-left px-3 py-2 rounded-lg text-sm border ${canal_activo === c.id ? "bg-[#f6a020] text-[#0a071f] border-[#f6a020]" : "bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"}`}
+                                className={`w-full text-left px-3 py-2 rounded-lg text-sm border ${canal_activo === c.id ? "bg-[#f6a020] text-[#0a071f] border-[#f6a020]" : "bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"}`}
                             >
                                 {c.nombre || c.id.slice(0, 6)}
                             </button>
                         ))}
+                        </div>
+                        <div className="w-1/5">
                         {canales.map((c) => (
                             <button
                                 key={c.id}
                                 onClick={() => borrar_canal(c.id)}
-                                className="w-1/5 text-left px-3 py-2 rounded-lg text-sm border bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"
+                                className="w-full text-left px-3 py-2 rounded-lg text-sm border bg-[#1c1837] text-white border-[#1c1837] hover:bg-[#242041]"
                             >
                                 B
                             </button>
                         ))}
-                        {canales.length === 0 && <div className="text-xs text-[#8f8aa0]">Selecciona inspección</div>}
+                        </div>
+                        {canales.length === 0 && <div className="w-full text-xs text-[#8f8aa0]">Selecciona inspección</div>}
                     </div>
                 </div>
 
