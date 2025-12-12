@@ -80,7 +80,7 @@ export async function crear_mensaje_repo({
     usuario_rol = null,
     contenido = null,
     tipo = "texto",
-    archivo_url = null,
+    archivo_url,
 }) {
     const sql = `
         INSERT INTO mensajes (

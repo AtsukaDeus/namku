@@ -19,7 +19,9 @@ const api_fetch = async (url, body = {}) => {
 export default function Home({ u_nombre, u_rol }) {
     const search_params = useSearchParams()
     const [mensaje, set_mensaje] = useState("")
+    const [archivo, set_archivo] =useState("")
     const [mostrar_opciones, set_mostrar_opciones] = useState(false)
+    const [mostrar_dropzone, set_mostrar_dropzone]= useState(false)
     const [mensajes, set_mensajes] = useState([])
     const [cargando, set_cargando] = useState(false)
     const [enviando, set_enviando] = useState(false)
@@ -87,11 +89,7 @@ export default function Home({ u_nombre, u_rol }) {
                         </div>
                     </div>
 
-                    <div className="flex-shrink-0">
-                        <div className="h-36 w-64 rounded-xl bg-[#d8d5e4] dark:bg-[#4a4168] border border-[#e1e3ec] dark:border-[#2f2948] flex items-center justify-center text-[#5a556c] dark:text-[#c7c4d6]">
-                            Imagen
-                        </div>
-                    </div>
+                    
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 flex-1 min-h-0 -mt-15">
@@ -138,10 +136,18 @@ export default function Home({ u_nombre, u_rol }) {
                                     <Button
                                         variant="ghost"
                                         className="w-full justify-start text-[#1f1b2f] dark:text-white hover:bg-[#cac5d6] dark:hover:bg-[#7d759f] gap-2 rounded-xl"
+                                        onClick={() => set_mostrar_dropzone(!mostrar_dropzone)}
                                     >
                                         <Imagen className="h-5 w-5" />
                                         Imagen
                                     </Button>
+                                </div>
+                            )}
+                            {mostrar_dropzone && (
+                                <div className="absolute -top-62">
+                                    <div className="h-36 w-64 rounded-xl bg-[#d8d5e4] dark:bg-[#4a4168] border border-[#e1e3ec] dark:border-[#2f2948] flex items-center justify-center text-[#5a556c] dark:text-[#c7c4d6]">
+                                        Imagen
+                                    </div>
                                 </div>
                             )}
                         </div>
