@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from "react"
+import { useDropzone } from 'react-dropzone';
 import { useSearchParams } from "next/navigation"
 import { Camera, Image as Imagen, MessageCircle, Plus, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -19,7 +20,6 @@ const api_fetch = async (url, body = {}) => {
 export default function Home({ u_nombre, u_rol }) {
     const search_params = useSearchParams()
     const [mensaje, set_mensaje] = useState("")
-    const [archivo, set_archivo] =useState("")
     const [mostrar_opciones, set_mostrar_opciones] = useState(false)
     const [mostrar_dropzone, set_mostrar_dropzone]= useState(false)
     const [mensajes, set_mensajes] = useState([])
@@ -27,6 +27,8 @@ export default function Home({ u_nombre, u_rol }) {
     const [enviando, set_enviando] = useState(false)
     const [error, set_error] = useState("")
     const [canal_activo, set_canal_activo] = useState("")
+
+    const [archivo, set_archivo] =useState(null);
     
     const canal_id = useMemo(() => {
         if (canal_activo) return canal_activo
@@ -53,13 +55,33 @@ export default function Home({ u_nombre, u_rol }) {
         cargar_mensajes()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [canal_id])
+
+    // covierte el contenedor en zona de arrastre
+    const { getRootProps, getInputProps } = useDropzone({
+        onDrop: (acceptedFiles) => {
+            set_archivo(acceptedFiles[0]);
+        },
+        accept: {
+            'image/jpeg': ['.jpeg', '.jpg'],
+            'image/png': ['.png'],
+        },
+        maxFiles: 1,
+    });
     
     const manejar_enviar_mensaje = async () => {
         if (!mensaje.trim() || !canal_id) return
         try {
             set_enviando(true)
             set_error("")
-            await api_fetch("/api/chat/enviar_mensaje", { canal_id, contenido: mensaje })
+            const formData = new FormData();
+            formData.append("canal_id", canal_id);
+            formData.append("contenido", mensaje);
+            formData.append("imagen", archivo);
+            await fetch('/api/chat/enviar_mensaje', {
+                method: "POST",
+                body: formData
+            })
+            // await api_fetch_file("/api/chat/enviar_mensaje", { canal_id, contenido: mensaje, imagen: archivo })
             set_mensaje("")
             await cargar_mensajes()
         } catch (err) {
@@ -145,8 +167,13 @@ export default function Home({ u_nombre, u_rol }) {
                             )}
                             {mostrar_dropzone && (
                                 <div className="absolute -top-62">
-                                    <div className="h-36 w-64 rounded-xl bg-[#d8d5e4] dark:bg-[#4a4168] border border-[#e1e3ec] dark:border-[#2f2948] flex items-center justify-center text-[#5a556c] dark:text-[#c7c4d6]">
-                                        Imagen
+                                    <div {...getRootProps({ className: "h-36 w-64 rounded-xl bg-[#d8d5e4] dark:bg-[#4a4168] border border-[#e1e3ec] dark:border-[#2f2948] flex items-center justify-center text-[#5a556c] dark:text-[#c7c4d6] cursor-pointer transition-all hover:bg-[#F2EFFF] dark:hover:bg-[#8c7dbe]" })}>
+                                        <input {...getInputProps()} className="hidden" />
+                                        {archivo ? (
+                                            <p className="text-center font-medium">{archivo.name}</p>
+                                        ) : (
+                                            <p className="text-center">Imagen</p>
+                                        )}
                                     </div>
                                 </div>
                             )}

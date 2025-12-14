@@ -3,7 +3,7 @@ import { enviar_mensaje_service } from "../services/chat_service"
 
 export async function POST(req) {
     try {
-        const body = await req.json()
+        const body = await req.formData();
         const { error, data, status } = await enviar_mensaje_service(body)
         if (error) return NextResponse.json({ error }, { status })
         return NextResponse.json(data, { status })

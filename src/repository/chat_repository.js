@@ -193,6 +193,16 @@ export async function listar_obras_repo(limit = 50) {
     return await query(sql)
 }
 
+export async function obtener_mensajes_por_canal_repo(canal_id) {
+    const sql = `
+        SELECT *
+        FROM mensajes
+        WHERE canal_id = $1
+        ORDER BY fecha_creacion DESC
+    `
+    return await query(sql, [canal_id])
+}
+
 export async function borrar_canal_repo(canal_id) {
     const sql = `
         DELETE FROM canales

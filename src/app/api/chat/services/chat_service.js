@@ -1,3 +1,5 @@
+import fs from 'fs/promises';
+import path from 'path';
 import { get_session } from "@/services/auth/user_session"
 import { select_usuario_by_email, select_usuario_by_id } from "@/repository/usuarios_repository"
 import {
@@ -11,6 +13,7 @@ import {
     obtener_canales_por_inspeccion_repo,
     crear_obra_repo,
     listar_obras_repo,
+    obtener_mensajes_por_canal_repo,
     borrar_canal_repo,
     borrar_inspeccion_repo,
     borrar_obra_repo
@@ -77,10 +80,28 @@ export async function enviar_mensaje_service(payload) {
     const { usuario_id, usuario_nombre, usuario_rol, error, status } = await resolver_usuario(session)
     if (error) return { error, status }
 
-    const { canal_id, contenido, tipo = "texto", archivo_url = null } = payload || {}
+    const canal_id = payload.get('canal_id')
+    const contenido = payload.get('contenido')
+    const tipo = "texto"
+    const imagen = payload.get('imagen')
+    //const { canal_id, contenido, tipo = "texto", imagen } = payload || {}
     if (!canal_id) return { error: "canal_id requerido", status: 400 }
     if (tipo === "texto" && (!contenido || !contenido.trim())) return { error: "contenido requerido", status: 400 }
 
+    let archivo_url = null
+    if (imagen) {
+        //Se trasforma el archivo en buffer
+        const file = imagen;
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes)
+
+        const uploadDir = path.join(process.cwd(), 'uploads');
+        await fs.mkdir(uploadDir, { recursive: true }); // Comprueba que el fichero exista y si no lo crea
+        const fileName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase(); // Elimina los caracteres que no coincidan con a-z0-9 y remplaza espacios por _
+        archivo_url = path.join(uploadDir, fileName); //Crea la ruta
+        await fs.writeFile(archivo_url, buffer); //Escribe el buffer en la ruta especifica
+    }
+    
     const mensaje = await crear_mensaje_repo({
         canal_id,
         usuario_id,
@@ -165,6 +186,12 @@ export async function borrar_canal_service(payload) {
     if (!session) return { error: "No autorizado", status: 401 }
     const { canal_id } = payload || {}
     if (!canal_id) return { error: "canal_id requerido", status: 400 }
+    const mensajes = await obtener_mensajes_por_canal_repo(canal_id)
+    
+    for (let i = 0; i < mensajes.length; i++) {
+        const elemento = mensajes[i];
+        await fs.rm(elemento.archivo_url); //En elemento.archivo_url se guarda la ruta completa
+    }
     const canal = await borrar_canal_repo(canal_id)
     return { data: { canal }, status: 200 }
 }
