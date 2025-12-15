@@ -138,7 +138,7 @@ export default function LoginPage() {
 
                     <div className="mt-6 text-center text-xs text-[#7a758a] dark:text-[#c7c4d6] space-y-2">
                         <p>Beta version {APP_VERSION}</p>
-                        <p>Desarrollado por <a href="https://github.com/AtsukaDeus?tab=repositories">@AtsukaDeuss</a> y <a href="https://github.com/AlbertoZegers?tab=repositories">@AlbertoZegers</a></p>
+                        <p>Desarrollado por <a href="https://github.com/AtsukaDeus?tab=repositories">@FranciscoArgandoña</a>, <a href="https://github.com/AlbertoZegers?tab=repositories">@AlbertoZegers</a> y <a href="https://github.com/mochiis76?tab=repositories">@FernandaRapiman</a></p>
                         <p>
                             ¿No tienes cuenta?{" "}
                             <button

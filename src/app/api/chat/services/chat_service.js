@@ -190,7 +190,9 @@ export async function borrar_canal_service(payload) {
     
     for (let i = 0; i < mensajes.length; i++) {
         const elemento = mensajes[i];
-        await fs.rm(elemento.archivo_url); //En elemento.archivo_url se guarda la ruta completa
+        if (elemento.archivo_url) {
+            await fs.rm(elemento.archivo_url); //En elemento.archivo_url se guarda la ruta completa
+        }
     }
     const canal = await borrar_canal_repo(canal_id)
     return { data: { canal }, status: 200 }

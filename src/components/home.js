@@ -76,7 +76,9 @@ export default function Home({ u_nombre, u_rol }) {
             const formData = new FormData();
             formData.append("canal_id", canal_id);
             formData.append("contenido", mensaje);
-            formData.append("imagen", archivo);
+            if (archivo) {
+                formData.append("imagen", archivo);
+            }
             await fetch('/api/chat/enviar_mensaje', {
                 method: "POST",
                 body: formData
@@ -95,109 +97,115 @@ export default function Home({ u_nombre, u_rol }) {
         <div className="relative min-h-[calc(90vh-5rem)] overflow-hidden rounded-3xl bg-[#f6f6fb] dark:bg-[#332d4a] border border-[#e1e3ec] dark:border-[#2f2948] shadow-md flex flex-col -mt-15">
             <div className="absolute inset-0 bg-[url('/handshake-line.svg')] bg-center bg-contain bg-no-repeat opacity-20 dark:opacity-10 pointer-events-none" />
 
-            <div className="relative flex flex-col h-full px-6 py-6 md:px-10 md:py-8 space-y-4 flex-1">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-                    <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-full bg-[#f6a020] text-white flex items-center justify-center shadow-lg">
-                            <MessageCircle className="h-6 w-6" />
-                        </div>
-                        <div>
-                            <p className="text-lg md:text-xl font-semibold text-[#1f1b2f] dark:text-[#f4f3fb]">
-                                ¡Hola{u_nombre ? ` ${u_nombre}` : ""}!, ¿En qué puedo ayudarte hoy?
-                            </p>
-                            <p className="text-sm text-[#5a556c] dark:text-[#c7c4d6]">
-                                {u_rol ? `Canal ${u_rol}` : "Chat de prevención"}
-                            </p>
-                        </div>
-                    </div>
-
-                    
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 flex-1 min-h-0 -mt-15">
-
-                    <div className="flex flex-col justify-end gap-3 pb-6">
-                        <div className="flex flex-col gap-3 overflow-y-auto pr-1 max-h-[55vh]">
-                            {error && <div className="text-sm text-red-300 bg-red-900/30 border border-red-600 rounded-lg px-3 py-2">{error}</div>}
-                            {cargando && <div className="text-sm text-[#c7c4d6]">Cargando mensajes...</div>}
-                            {!cargando && mensajes.length === 0 && <div className="text-sm text-[#c7c4d6]">Sin mensajes aún.</div>}
-
-                        {mensajes.map((m) => (
-                            <div key={m.id} className="flex justify-end">
-                                <div className="max-w-3xl bg-[#cbc7d8] dark:bg-[#6f668e] text-[#1f1b2f] dark:text-white rounded-2xl rounded-br-none p-4 shadow-sm">
-                                    <div className="flex items-center gap-4 text-xs text-[#44404f] dark:text-[#e1def0] mb-2">
-                                        <span>{new Date(m.fecha_creacion).toLocaleDateString()}</span>
-                                        <span>{new Date(m.fecha_creacion).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                                        <span className="font-semibold">{m.usuario_nombre}</span>
-                                    </div>
-                                    <p className="text-base leading-relaxed whitespace-pre-wrap">{m.contenido}</p>
-                                </div>
+                <div className="relative flex flex-col h-full px-6 py-6 md:px-10 md:py-8 space-y-4 flex-1">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+                        <div className="flex items-center gap-4">
+                            <div className="h-12 w-12 rounded-full bg-[#f6a020] text-white flex items-center justify-center shadow-lg">
+                                <MessageCircle className="h-6 w-6" />
                             </div>
-                        ))}
-                    </div>
-
-                    <div className="relative flex items-end gap-3 bg-[#e7e7f2] dark:bg-[#4a4168] border border-[#d3d2de] dark:border-[#312b48] rounded-full px-4 py-3 shadow-inner">
-                        <div className="relative">
-                            <Button
-                                type="button"
-                                onClick={() => set_mostrar_opciones(!mostrar_opciones)}
-                                className="bg-[#b6b0c5] hover:bg-[#ada6c0] dark:bg-[#6f668e] dark:hover:bg-[#7d759f] text-white rounded-full h-12 w-12 p-0"
-                            >
-                                <Plus className="h-6 w-6" />
-                            </Button>
-
-                            {mostrar_opciones && (
-                                <div className="absolute bottom-14 left-0 bg-[#b6b0c5] dark:bg-[#6f668e] rounded-2xl p-2 space-y-1 shadow-lg">
-                                    <Button
-                                        variant="ghost"
-                                        className="w-full justify-start text-[#1f1b2f] dark:text-white hover:bg-[#cac5d6] dark:hover:bg-[#7d759f] gap-2 rounded-xl"
-                                    >
-                                        <Camera className="h-5 w-5" />
-                                        Foto
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        className="w-full justify-start text-[#1f1b2f] dark:text-white hover:bg-[#cac5d6] dark:hover:bg-[#7d759f] gap-2 rounded-xl"
-                                        onClick={() => set_mostrar_dropzone(!mostrar_dropzone)}
-                                    >
-                                        <Imagen className="h-5 w-5" />
-                                        Imagen
-                                    </Button>
-                                </div>
-                            )}
-                            {mostrar_dropzone && (
-                                <div className="absolute -top-62">
-                                    <div {...getRootProps({ className: "h-36 w-64 rounded-xl bg-[#d8d5e4] dark:bg-[#4a4168] border border-[#e1e3ec] dark:border-[#2f2948] flex items-center justify-center text-[#5a556c] dark:text-[#c7c4d6] cursor-pointer transition-all hover:bg-[#F2EFFF] dark:hover:bg-[#8c7dbe]" })}>
-                                        <input {...getInputProps()} className="hidden" />
-                                        {archivo ? (
-                                            <p className="text-center font-medium">{archivo.name}</p>
-                                        ) : (
-                                            <p className="text-center">Imagen</p>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
+                            <div>
+                                <p className="text-lg md:text-xl font-semibold text-[#1f1b2f] dark:text-[#f4f3fb]">
+                                    ¡Hola{u_nombre ? ` ${u_nombre}` : ""}!, ¿En qué puedo ayudarte hoy?
+                                </p>
+                                <p className="text-sm text-[#5a556c] dark:text-[#c7c4d6]">
+                                    {u_rol ? `Canal ${u_rol}` : "Chat de prevención"}
+                                </p>
+                            </div>
                         </div>
 
-                        <input
-                            type="text"
-                            placeholder="Enviar"
-                            value={mensaje}
-                            onChange={(e) => set_mensaje(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && manejar_enviar_mensaje()}
-                            className="flex-1 bg-transparent text-[#1f1b2f] dark:text-white placeholder-[#7a758a] dark:placeholder-[#d3cfe1] rounded-full px-4 py-3 outline-none"
-                        />
+                        
+                    </div>
 
-                        <Button
-                            onClick={manejar_enviar_mensaje}
-                            className="bg-[#f6a020] hover:bg-[#e59210] text-white rounded-full h-12 w-12 p-0 shadow-md"
-                        >
-                            <Send className="h-5 w-5" />
-                        </Button>
+                    <div className="grid grid-cols-1 gap-4 flex-1 min-h-0 -mt-15">
+
+                        <div className="flex flex-col justify-end gap-3 pb-6">
+                            <div className="flex flex-col gap-3 overflow-y-auto pr-1 max-h-[55vh]">
+                                {error && <div className="text-sm text-red-300 bg-red-900/30 border border-red-600 rounded-lg px-3 py-2">{error}</div>}
+                                {cargando && <div className="text-sm text-[#c7c4d6]">Cargando mensajes...</div>}
+                                {!cargando && mensajes.length === 0 && <div className="text-sm text-[#c7c4d6]">Sin mensajes aún.</div>}
+
+                            {mensajes.map((m) => (
+                                <div key={m.id} className="flex justify-end">
+                                    <div className="max-w-3xl bg-[#cbc7d8] dark:bg-[#6f668e] text-[#1f1b2f] dark:text-white rounded-2xl rounded-br-none p-4 shadow-sm">
+                                        <div className="flex items-center gap-4 text-xs text-[#44404f] dark:text-[#e1def0] mb-2">
+                                            <span>{new Date(m.fecha_creacion).toLocaleDateString()}</span>
+                                            <span>{new Date(m.fecha_creacion).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                                            <span className="font-semibold">{m.usuario_nombre}</span>
+                                        </div>
+                                        <p className="text-base leading-relaxed whitespace-pre-wrap">{m.contenido}</p>
+                                        {m.archivo_url ? (
+                                            <div className="h-36 w-64 rounded-xl bg-[#d8d5e4] dark:bg-[#4a4168] border border-[#e1e3ec] dark:border-[#2f2948] flex items-center justify-center text-[#5a556c] dark:text-[#c7c4d6] mt-2">
+                                                <p className="text-center">Imagen</p>
+                                            </div>
+                                        ) : (<></>)}
+                                        
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="relative flex items-end gap-3 bg-[#e7e7f2] dark:bg-[#4a4168] border border-[#d3d2de] dark:border-[#312b48] rounded-full px-4 py-3 shadow-inner">
+                            <div className="relative">
+                                <Button
+                                    type="button"
+                                    onClick={() => set_mostrar_opciones(!mostrar_opciones)}
+                                    className="bg-[#b6b0c5] hover:bg-[#ada6c0] dark:bg-[#6f668e] dark:hover:bg-[#7d759f] text-white rounded-full h-12 w-12 p-0"
+                                >
+                                    <Plus className="h-6 w-6" />
+                                </Button>
+
+                                {mostrar_opciones && (
+                                    <div className="absolute bottom-14 left-0 bg-[#b6b0c5] dark:bg-[#6f668e] rounded-2xl p-2 space-y-1 shadow-lg">
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start text-[#1f1b2f] dark:text-white hover:bg-[#cac5d6] dark:hover:bg-[#7d759f] gap-2 rounded-xl"
+                                        >
+                                            <Camera className="h-5 w-5" />
+                                            Foto
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start text-[#1f1b2f] dark:text-white hover:bg-[#cac5d6] dark:hover:bg-[#7d759f] gap-2 rounded-xl"
+                                            onClick={() => set_mostrar_dropzone(!mostrar_dropzone)}
+                                        >
+                                            <Imagen className="h-5 w-5" />
+                                            Imagen
+                                        </Button>
+                                    </div>
+                                )}
+                                {mostrar_dropzone && (
+                                    <div className="absolute -top-62">
+                                        <div {...getRootProps({ className: "h-36 w-64 rounded-xl bg-[#d8d5e4] dark:bg-[#4a4168] border border-[#e1e3ec] dark:border-[#2f2948] flex items-center justify-center text-[#5a556c] dark:text-[#c7c4d6] cursor-pointer transition-all hover:bg-[#F2EFFF] dark:hover:bg-[#8c7dbe]" })}>
+                                            <input {...getInputProps()} className="hidden" />
+                                            {archivo ? (
+                                                <p className="text-center font-medium">{archivo.name}</p>
+                                            ) : (
+                                                <p className="text-center">Imagen</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <input
+                                type="text"
+                                placeholder="Enviar"
+                                value={mensaje}
+                                onChange={(e) => set_mensaje(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && manejar_enviar_mensaje()}
+                                className="flex-1 bg-transparent text-[#1f1b2f] dark:text-white placeholder-[#7a758a] dark:placeholder-[#d3cfe1] rounded-full px-4 py-3 outline-none"
+                            />
+
+                            <Button
+                                onClick={manejar_enviar_mensaje}
+                                className="bg-[#f6a020] hover:bg-[#e59210] text-white rounded-full h-12 w-12 p-0 shadow-md"
+                            >
+                                <Send className="h-5 w-5" />
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     )
 }
