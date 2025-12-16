@@ -88,6 +88,7 @@ export async function enviar_mensaje_service(payload) {
     if (!canal_id) return { error: "canal_id requerido", status: 400 }
     if (tipo === "texto" && (!contenido || !contenido.trim())) return { error: "contenido requerido", status: 400 }
 
+    let ruta_relativa = null
     let archivo_url = null
     if (imagen) {
         //Se trasforma el archivo en buffer
@@ -95,10 +96,11 @@ export async function enviar_mensaje_service(payload) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes)
 
-        const uploadDir = path.join(process.cwd(), 'uploads');
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
         await fs.mkdir(uploadDir, { recursive: true }); // Comprueba que el fichero exista y si no lo crea
         const fileName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase(); // Elimina los caracteres que no coincidan con a-z0-9 y remplaza espacios por _
-        archivo_url = path.join(uploadDir, fileName); //Crea la ruta
+        archivo_url = path.join(uploadDir, fileName); //Crea la ruta absoluta
+        ruta_relativa = path.join('/uploads', fileName).replace(/\\/g, '/'); //Crea la ruta relativa
         await fs.writeFile(archivo_url, buffer); //Escribe el buffer en la ruta especifica
     }
     
@@ -110,6 +112,7 @@ export async function enviar_mensaje_service(payload) {
         contenido,
         tipo,
         archivo_url,
+        ruta_relativa,
     })
 
     // marcar como leído para el autor

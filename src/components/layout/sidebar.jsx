@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { ChevronLeft, CirclePlus, Search, Trash, Trash2 } from "lucide-react"
+import { ChevronLeft, CirclePlus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useSession } from "next-auth/react"
 
@@ -264,7 +264,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
                             />
                             <input
                                 type="text"
-                                placeholder="Código (opcional)"
+                                placeholder="Código"
                                 value={nueva_inspeccion.codigo}
                                 onChange={(e) => set_nueva_inspeccion({ ...nueva_inspeccion, codigo: e.target.value })}
                                 className="w-full rounded-lg px-3 py-2 bg-[#1f1a31] border border-[#312b48] text-sm"

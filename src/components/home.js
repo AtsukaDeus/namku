@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from "react"
+import Image from "next/image"
 import { useDropzone } from 'react-dropzone';
 import { useSearchParams } from "next/navigation"
 import { Camera, Image as Imagen, MessageCircle, Plus, Send } from "lucide-react"
@@ -133,9 +134,9 @@ export default function Home({ u_nombre, u_rol }) {
                                             <span className="font-semibold">{m.usuario_nombre}</span>
                                         </div>
                                         <p className="text-base leading-relaxed whitespace-pre-wrap">{m.contenido}</p>
-                                        {m.archivo_url ? (
+                                        {m.ruta_relativa ? (
                                             <div className="h-36 w-64 rounded-xl bg-[#d8d5e4] dark:bg-[#4a4168] border border-[#e1e3ec] dark:border-[#2f2948] flex items-center justify-center text-[#5a556c] dark:text-[#c7c4d6] mt-2">
-                                                <p className="text-center">Imagen</p>
+                                                <Image src={m.ruta_relativa} alt="Imagen" width={90} height={90} />
                                             </div>
                                         ) : (<></>)}
                                         
@@ -148,7 +149,7 @@ export default function Home({ u_nombre, u_rol }) {
                             <div className="relative">
                                 <Button
                                     type="button"
-                                    onClick={() => set_mostrar_opciones(!mostrar_opciones)}
+                                    onClick={() => {set_mostrar_opciones(!mostrar_opciones); set_mostrar_dropzone(false);} }
                                     className="bg-[#b6b0c5] hover:bg-[#ada6c0] dark:bg-[#6f668e] dark:hover:bg-[#7d759f] text-white rounded-full h-12 w-12 p-0"
                                 >
                                     <Plus className="h-6 w-6" />
