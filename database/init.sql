@@ -234,7 +234,7 @@ CREATE TABLE mensajes (
     contenido TEXT DEFAULT NULL,
     tipo VARCHAR NOT NULL CHECK (tipo IN ('texto', 'imagen', 'archivo', 'sistema')),
     archivo_url VARCHAR DEFAULT NULL,
-    ruta_relativa VARCHAR DEFAULT NULL,
+    archivo_ruta VARCHAR DEFAULT NULL,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_mensaje_contenido
@@ -243,7 +243,7 @@ CREATE TABLE mensajes (
 
 -- evita error de rutas duplicadas
 ALTER TABLE mensajes
-    ADD CONSTRAINT uk_mensajes UNIQUE (archivo_url, ruta_relativa);
+    ADD CONSTRAINT uk_mensajes UNIQUE (archivo_url, archivo_ruta);
 
 CREATE INDEX idx_mensajes_canal ON mensajes (canal_id, fecha_creacion);
 CREATE INDEX idx_mensajes_usuario ON mensajes (usuario_id);

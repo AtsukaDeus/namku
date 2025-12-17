@@ -6,7 +6,6 @@ import { useDropzone } from 'react-dropzone';
 import { useSearchParams } from "next/navigation"
 import { Camera, Image as Imagen, MessageCircle, Plus, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import carga_imagenes from "../utils/carga_imagen"
 
 const api_fetch = async (url, body = {}) => {
     const res = await fetch(url, {
@@ -137,7 +136,7 @@ export default function Home({ u_nombre, u_rol }) {
                                         <p className="text-base leading-relaxed whitespace-pre-wrap">{m.contenido}</p>
                                         {m.ruta_relativa ? (
                                             <div className="h-36 w-64 rounded-xl bg-[#d8d5e4] dark:bg-[#4a4168] border border-[#e1e3ec] dark:border-[#2f2948] flex items-center justify-center text-[#5a556c] dark:text-[#c7c4d6] mt-2">
-                                                <Image loader={carga_imagenes} src={m.ruta_relativa} alt="Imagen" width={90} height={90} />
+                                                <Image src={m.archivo_url} alt="Imagen" width={90} height={90} />
                                             </div>
                                         ) : (<></>)}
                                         

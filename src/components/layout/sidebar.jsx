@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils"
 import { ChevronLeft, CirclePlus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useSession } from "next-auth/react"
-import carga_imagenes from "../../utils/carga_imagen"
 
 const api_fetch = async (url, body = {}) => {
     const res = await fetch(url, {
@@ -183,7 +182,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
             <div className="flex items-center justify-between px-4 py-4 border-b border-[#1c1837]">
                 <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-[#f6a020]/40 flex items-center justify-center shadow-md">
-                        <Image loader={carga_imagenes} src="/logo-namku.png" alt="Logo Namku" width={52} height={52} />
+                        <Image src="/logo-namku.png" alt="Logo Namku" width={52} height={52} />
                     </div>
                     {!isCollapsed && <span className="text-xl font-semibold">Namku</span>}
                 </div>
