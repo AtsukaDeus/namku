@@ -102,7 +102,7 @@ export async function enviar_mensaje_service(payload) {
         const fileName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase(); // Elimina los caracteres que no coincidan con a-z0-9 y remplaza espacios por _
         archivo_ruta = path.join(uploadDir, fileName); //Crea la ruta absoluta
         archivo_url = path.join('/uploads', fileName).replace(/\\/g, '/'); //Crea la ruta relativa
-        await fs.writeFile(archivo_url, buffer); //Escribe el buffer en la ruta especifica
+        await fs.writeFile(archivo_ruta, buffer); //Escribe el buffer en la ruta especifica
     }
     
     const mensaje = await crear_mensaje_repo({

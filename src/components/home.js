@@ -134,7 +134,7 @@ export default function Home({ u_nombre, u_rol }) {
                                             <span className="font-semibold">{m.usuario_nombre}</span>
                                         </div>
                                         <p className="text-base leading-relaxed whitespace-pre-wrap">{m.contenido}</p>
-                                        {m.ruta_relativa ? (
+                                        {m.archivo_url ? (
                                             <div className="h-36 w-64 rounded-xl bg-[#d8d5e4] dark:bg-[#4a4168] border border-[#e1e3ec] dark:border-[#2f2948] flex items-center justify-center text-[#5a556c] dark:text-[#c7c4d6] mt-2">
                                                 <Image src={m.archivo_url} alt="Imagen" width={90} height={90} />
                                             </div>

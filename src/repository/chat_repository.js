@@ -81,12 +81,12 @@ export async function crear_mensaje_repo({
     contenido = null,
     tipo = "texto",
     archivo_url,
-    ruta_relativa,
+    archivo_ruta,
 }) {
     const sql = `
         INSERT INTO mensajes (
             canal_id, usuario_id, usuario_nombre, usuario_rol,
-            contenido, tipo, archivo_url, ruta_relativa
+            contenido, tipo, archivo_url, archivo_ruta
         )
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
         RETURNING *
@@ -99,7 +99,7 @@ export async function crear_mensaje_repo({
         contenido,
         tipo,
         archivo_url,
-        ruta_relativa,
+        archivo_ruta,
     ])
     return res?.[0]
 }
