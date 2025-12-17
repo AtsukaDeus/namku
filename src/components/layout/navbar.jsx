@@ -13,6 +13,7 @@ import { useNotificaciones } from "@/hooks/use-notificaciones"
 import { useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
+import carga_imagenes from "../../utils/carga_imagen"
 
 export function Navbar({ onMenuClick }) {
     const { data: session } = useSession()
@@ -65,7 +66,7 @@ export function Navbar({ onMenuClick }) {
                     </Button>
                     <Link href="/" className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-full bg-[#f6a020]/40 shadow-md flex items-center justify-center">
-                            <Image src="/logo-namku.png" alt="Namku" width={64} height={64} priority />
+                            <Image loader={carga_imagenes} src="/logo-namku.png" alt="Namku" width={64} height={64} priority />
                         </div>
                         <span className="hidden md:inline-block font-semibold text-2xl text-[#1f1b2f] dark:text-[#f6f5fb]">
                             Namku <span className="text-sm ml-4">{`(Versión 1.0)`}</span>

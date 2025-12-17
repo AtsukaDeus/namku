@@ -7,6 +7,7 @@ import { AlertCircle, Eye, EyeOff, Loader2, Lock, Mail, Phone, User } from "luci
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { show_alert } from "@/lib/utils"
+import carga_imagenes from "../../../utils/carga_imagen"
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -68,13 +69,13 @@ export default function RegisterPage() {
 
             <div className="w-full max-w-xl flex flex-col items-center gap-6">
                 <div className="flex items-center gap-3">
-                    <Image src="/logo-namku.png" alt="Namku" width={76} height={76} priority />
+                    <Image loader={carga_imagenes} src="/logo-namku.png" alt="Namku" width={76} height={76} priority />
                     <h1 className="text-3xl font-semibold">Namku</h1>
                 </div>
 
                 <div className="w-full bg-white text-[#1f1b2f] dark:bg-[#151020] dark:text-[#f4f3fb] border border-[#e1e3ec] dark:border-[#2f2948] rounded-3xl shadow-2xl p-10 relative overflow-hidden">
                     <div className="absolute -top-12 left-1/2 -translate-x-1/2 h-24 w-24 rounded-full bg-[#f6a020] flex items-center justify-center shadow-lg ring-4 ring-white/60 dark:ring-[#0a071f]">
-                        <Image src="/logo-namku.png" alt="Avatar" width={56} height={56} />
+                        <Image loader={carga_imagenes} src="/logo-namku.png" alt="Avatar" width={56} height={56} />
                     </div>
 
                     <div className="mt-14 text-center mb-8">
