@@ -2,7 +2,6 @@
 const nextConfig = {
   /* config options here */
   reactCompiler: true,
-  devIndicators: true,
   images: {
     unoptimized: true,
   },
