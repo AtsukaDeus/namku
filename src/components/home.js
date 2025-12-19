@@ -30,6 +30,8 @@ export default function Home({ u_nombre, u_rol }) {
     const [canal_activo, set_canal_activo] = useState("")
 
     const [archivo, set_archivo] =useState(null);
+
+    // const obs_url = "http://127.0.0.1:9001/obtener-img"
     
     const canal_id = useMemo(() => {
         if (canal_activo) return canal_activo
@@ -137,6 +139,7 @@ export default function Home({ u_nombre, u_rol }) {
                                         {m.archivo_url ? (
                                             <div className="h-36 w-64 rounded-xl bg-[#d8d5e4] dark:bg-[#4a4168] border border-[#e1e3ec] dark:border-[#2f2948] flex items-center justify-center text-[#5a556c] dark:text-[#c7c4d6] mt-2">
                                                 <Image src={m.archivo_url} alt="Imagen" width={90} height={90} />
+                                                {/* cambiar src por obs_url+m.archivo_url  */}
                                             </div>
                                         ) : (<></>)}
                                         

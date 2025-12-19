@@ -65,6 +65,11 @@ export function Sidebar({ isCollapsed, onToggle }) {
         cargar_obras()
     }, [])
 
+    const limpiar_mensajes = () => {
+        set_canal_activo("")
+        router.push(`/`)
+    }
+
     const cargar_obras = async () => {
         try {
             const { obras } = await api_fetch("/api/chat/listar_obras", { limit: 50 })
@@ -158,6 +163,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
         try {
             await api_fetch("/api/chat/borrar_inspeccion", {inspeccion_id})
             await cargar_inspecciones()
+            limpiar_mensajes()
         } catch (error) {
             set_error(error.message || "No se pudo borrar la inspección")
         }
@@ -167,6 +173,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
         try {
             await api_fetch("/api/chat/borrar_canal", {canal_id})
             await cargar_canales(inspeccion_activa)
+            limpiar_mensajes()
         } catch (error) {
             set_error(error.message || "No se pudo borrar el canal")
         }
