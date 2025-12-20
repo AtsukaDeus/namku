@@ -58,17 +58,17 @@ export function Navbar({ onMenuClick }) {
 
     return (
         <header className="sticky top-0 z-50 w-full bg-white dark:bg-[#4e476c] border-b border-[#e1e3ec] dark:border-[#332d4a] shadow-sm">
-            <div className="flex h-16 items-center justify-between px-4 md:px-6">
-                <div className="flex items-center gap-3">
-                    <Button variant="ghost" size="icon" className="md:hidden text-[#1f1b2f] dark:text-[#f4f3fb]" onClick={onMenuClick}>
-                        <Menu className="h-6 w-6" />
+            <div className="flex h-12 md:h-16 items-center justify-between px-2 md:px-4 lg:px-6">
+                <div className="flex items-center gap-1 md:gap-3">
+                    <Button variant="ghost" size="icon" className="md:hidden text-[#1f1b2f] dark:text-[#f4f3fb] h-8 w-8" onClick={onMenuClick}>
+                        <Menu className="h-5 w-5" />
                     </Button>
-                    <Link href="/" className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-[#f6a020]/40 shadow-md flex items-center justify-center">
-                            <Image src="/logo-namku.png" alt="Namku" width={64} height={64} priority />
+                    <Link href="/" className="flex items-center gap-2 md:gap-3">
+                        <div className="h-7 w-7 md:h-10 md:w-10 rounded-full bg-[#f6a020]/40 shadow-md flex items-center justify-center">
+                            <Image src="/logo-namku.png" alt="Namku" width={64} height={64} priority className="scale-75 md:scale-100" />
                         </div>
-                        <span className="hidden md:inline-block font-semibold text-2xl text-[#1f1b2f] dark:text-[#f6f5fb]">
-                            Namku <span className="text-sm ml-4">{`(Versión 1.0)`}</span>
+                        <span className="hidden md:inline-block font-semibold text-xl lg:text-2xl text-[#1f1b2f] dark:text-[#f6f5fb]">
+                            Namku <span className="text-xs lg:text-sm ml-2 lg:ml-4">{`(Versión 1.0)`}</span>
                         </span>
                     </Link>
                 </div>
@@ -77,23 +77,23 @@ export function Navbar({ onMenuClick }) {
                     Hola {session?.user?.nombre || "prevencionista"}
                 </div>
 
-                <div className="flex items-center gap-1 md:gap-2">
-                    <Button variant="ghost" size="icon" className="text-[#1f1b2f] dark:text-[#f4f3fb] hover:bg-[#e7e7f2] dark:hover:bg-[#5b5377]">
-                        <Settings className="h-5 w-5" />
+                <div className="flex items-center gap-0.5 md:gap-1 lg:gap-2">
+                    <Button variant="ghost" size="icon" className="text-[#1f1b2f] dark:text-[#f4f3fb] hover:bg-[#e7e7f2] dark:hover:bg-[#5b5377] h-8 w-8 md:h-10 md:w-10">
+                        <Settings className="h-4 w-4 md:h-5 md:w-5" />
                     </Button>
 
                     <DropdownMenu onOpenChange={(open) => { if (open) cargar_notificaciones_ui() }}>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="relative text-[#1f1b2f] dark:text-[#f4f3fb] hover:bg-[#e7e7f2] dark:hover:bg-[#5b5377]">
-                                <Bell className="h-5 w-5" />
+                            <Button variant="ghost" size="icon" className="relative text-[#1f1b2f] dark:text-[#f4f3fb] hover:bg-[#e7e7f2] dark:hover:bg-[#5b5377] h-8 w-8 md:h-10 md:w-10">
+                                <Bell className="h-4 w-4 md:h-5 md:w-5" />
                                 {count > 0 && (
-                                    <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center">
+                                    <Badge variant="destructive" className="absolute -top-0.5 -right-0.5 md:-top-1 md:-right-1 h-4 w-4 md:h-5 md:w-5 rounded-full p-0 text-[10px] md:text-xs flex items-center justify-center">
                                         {count > 9 ? '9+' : count}
                                     </Badge>
                                 )}
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-80">
+                        <DropdownMenuContent align="end" className="w-72 md:w-80">
                             <div className="flex items-center justify-between p-2 border-b">
                                 <DropdownMenuLabel className="p-0">Notificaciones</DropdownMenuLabel>
                                 {count > 0 && (
@@ -116,15 +116,15 @@ export function Navbar({ onMenuClick }) {
 
                     <ThemeToggle />
 
-                    <Button variant="ghost" size="icon" className="text-[#1f1b2f] dark:text-[#f4f3fb] hover:bg-[#e7e7f2] dark:hover:bg-[#5b5377]">
-                        <HelpCircle className="h-5 w-5" />
+                    <Button variant="ghost" size="icon" className="text-[#1f1b2f] dark:text-[#f4f3fb] hover:bg-[#e7e7f2] dark:hover:bg-[#5b5377] h-8 w-8 md:h-10 md:w-10">
+                        <HelpCircle className="h-4 w-4 md:h-5 md:w-5" />
                     </Button>
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-[#e7e7f2] dark:hover:bg-[#5b5377]">
-                                <Avatar className="h-10 w-10">
-                                    <AvatarFallback className="bg-[#f6a020] text-[#1f1b2f] font-semibold">
+                            <Button variant="ghost" className="relative h-8 w-8 md:h-10 md:w-10 rounded-full hover:bg-[#e7e7f2] dark:hover:bg-[#5b5377]">
+                                <Avatar className="h-8 w-8 md:h-10 md:w-10">
+                                    <AvatarFallback className="bg-[#f6a020] text-[#1f1b2f] font-semibold text-xs md:text-sm">
                                         {obtener_iniciales(session?.user?.nombre || "Usuario")}
                                     </AvatarFallback>
                                 </Avatar>

@@ -304,3 +304,47 @@ export async function obtener_mis_inspecciones_repo({ usuario_id, limit = 100 })
     `
     return await query(sql, [usuario_id])
 }
+
+export async function obtener_hallazgos_por_inspeccion_repo(inspeccion_id) {
+    const sql = `
+        SELECT
+            id,
+            descripcion,
+            criticidad,
+            ruta_imagen,
+            fecha_cierre,
+            fecha_levantamiento,
+            fecha_creacion
+        FROM hallazgo
+        WHERE inspeccion_id = $1
+        ORDER BY
+            CASE criticidad
+                WHEN 'INTOLERABLE' THEN 1
+                WHEN 'IMPORTANTE' THEN 2
+                WHEN 'MODERADO' THEN 3
+                WHEN 'TOLERABLE' THEN 4
+                WHEN 'TRIVIAL' THEN 5
+            END,
+            fecha_creacion DESC
+    `
+    return await query(sql, [inspeccion_id])
+}
+
+export async function obtener_detalle_inspeccion_repo(inspeccion_id) {
+    const sql = `
+        SELECT
+            i.*,
+            o.nombre_obra,
+            o.tipo_obra,
+            o.estado as estado_obra,
+            o.descripcion as descripcion_obra,
+            u.nombre as nombre_encargado,
+            u.email as email_encargado
+        FROM inspecciones i
+        LEFT JOIN obras o ON i.obra_id = o.id
+        LEFT JOIN usuarios u ON i.encargado_id = u.id
+        WHERE i.id = $1
+    `
+    const result = await query(sql, [inspeccion_id])
+    return result?.[0]
+}

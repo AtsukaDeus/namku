@@ -162,73 +162,73 @@ export function Sidebar({ isCollapsed, onToggle }) {
     return (
         <aside
             className={cn(
-                "fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] bg-[#0a071f] text-white shadow-xl transition-all duration-300 ease-in-out flex flex-col",
-                isCollapsed ? "w-20" : "w-72"
+                "fixed left-0 top-12 md:top-16 z-40 h-[calc(100vh-3rem)] md:h-[calc(120vh-4rem)] bg-[#0a071f] text-white shadow-xl transition-all duration-300 ease-in-out flex flex-col",
+                isCollapsed ? "w-16 md:w-20" : "w-64 md:w-72"
             )}
         >
-            <div className="flex items-center justify-between px-4 py-4 border-b border-[#1c1837]">
-                <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-[#f6a020]/40 flex items-center justify-center shadow-md">
-                        <Image src="/logo-namku.png" alt="Logo Namku" width={52} height={52} />
+            <div className="flex items-center justify-between px-2 md:px-4 py-2 md:py-4 border-b border-[#1c1837]">
+                <div className="flex items-center gap-2 md:gap-3">
+                    <div className="h-7 w-7 md:h-10 md:w-10 rounded-full bg-[#f6a020]/40 flex items-center justify-center shadow-md">
+                        <Image src="/logo-namku.png" alt="Logo Namku" width={52} height={52} className="scale-75 md:scale-100" />
                     </div>
-                    {!isCollapsed && <span className="text-xl font-semibold">Namku</span>}
+                    {!isCollapsed && <span className="text-base md:text-xl font-semibold">Namku</span>}
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="text-white hover:bg-[#1c1837]" aria-label="Colapsar" onClick={onToggle}>
-                        <ChevronLeft className={cn("h-5 w-5 transition-transform", isCollapsed ? "rotate-180" : "")} />
+                <div className="flex items-center gap-1 md:gap-2">
+                    <Button variant="ghost" size="icon" className="text-white hover:bg-[#1c1837] h-7 w-7 md:h-10 md:w-10" aria-label="Colapsar" onClick={onToggle}>
+                        <ChevronLeft className={cn("h-4 w-4 md:h-5 md:w-5 transition-transform", isCollapsed ? "rotate-180" : "")} />
                     </Button>
                 </div>
             </div>
 
-            <div className="flex-1 flex flex-col p-4 space-y-6 overflow-y-auto">
+            <div className="flex-1 flex flex-col p-2 md:p-4 space-y-3 md:space-y-6 overflow-y-auto">
                 <Button
-                    className="w-full bg-[#6f668e] hover:bg-[#7d759f] text-white rounded-full py-5 font-semibold shadow-md flex items-center justify-center gap-2"
+                    className="w-full bg-[#6f668e] hover:bg-[#7d759f] text-white rounded-full py-3 md:py-5 text-xs md:text-base font-semibold shadow-md flex items-center justify-center gap-1.5 md:gap-2"
                     onClick={() => set_modal_abierto(true)}
                 >
-                    <CirclePlus className="h-5 w-5" />
+                    <CirclePlus className="h-4 w-4 md:h-5 md:w-5" />
                     {!isCollapsed && "Nueva Inspección"}
                 </Button>
 
                 <Button
-                    className="w-full bg-[#4a4168] hover:bg-[#5a516e] text-white rounded-full py-3 font-medium shadow-md flex items-center justify-center gap-2"
+                    className="w-full bg-[#4a4168] hover:bg-[#5a516e] text-white rounded-full py-2 md:py-3 text-xs md:text-base font-medium shadow-md flex items-center justify-center gap-1.5 md:gap-2"
                     onClick={() => router.push("/namku/mis-inspecciones")}
                 >
-                    <FileText className="h-5 w-5" />
+                    <FileText className="h-4 w-4 md:h-5 md:w-5" />
                     {!isCollapsed && "Mis Inspecciones"}
                 </Button>
 
-                {!isCollapsed && error && <div className="text-xs text-red-300 bg-red-900/30 border border-red-700 rounded-lg p-2">{error}</div>}
+                {!isCollapsed && error && <div className="text-[10px] md:text-xs text-red-300 bg-red-900/30 border border-red-700 rounded-lg p-1.5 md:p-2">{error}</div>}
 
                 {/* Sección: Obras */}
-                <div className="space-y-2">
+                <div className="space-y-1.5 md:space-y-2">
                     {!isCollapsed && (
-                        <div className="flex items-center gap-2 px-2">
-                            <Building2 className="h-4 w-4 text-[#f6a020]" />
-                            <p className="text-xs font-semibold uppercase tracking-wider text-[#c7c4d6]">
+                        <div className="flex items-center gap-1.5 md:gap-2 px-1 md:px-2">
+                            <Building2 className="h-3 w-3 md:h-4 md:w-4 text-[#f6a020]" />
+                            <p className="text-[10px] md:text-xs font-semibold uppercase tracking-wider text-[#c7c4d6]">
                                 Obras
                             </p>
                             {obras.length > 0 && (
-                                <span className="ml-auto text-xs bg-[#f6a020]/20 text-[#f6a020] px-2 py-0.5 rounded-full font-medium">
+                                <span className="ml-auto text-[10px] md:text-xs bg-[#f6a020]/20 text-[#f6a020] px-1.5 md:px-2 py-0.5 rounded-full font-medium">
                                     {obras.length}
                                 </span>
                             )}
                         </div>
                     )}
-                    <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                    <div className="space-y-1 md:space-y-1.5 max-h-32 md:max-h-40 overflow-y-auto pr-0.5 md:pr-1">
                         {obras.map((obra) => (
                             <button
                                 key={obra.id}
                                 onClick={() => on_select_obra(obra.id)}
                                 className={cn(
-                                    "w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all duration-200 group",
+                                    "w-full text-left px-2 py-1.5 md:px-3 md:py-2.5 rounded-lg md:rounded-xl text-xs md:text-sm transition-all duration-200 group",
                                     obra_activa === obra.id
                                         ? "bg-gradient-to-r from-[#f6a020] to-[#e59210] text-white shadow-lg shadow-[#f6a020]/30"
                                         : "bg-[#1c1837]/50 text-[#c7c4d6] hover:bg-[#242041] hover:text-white hover:shadow-md"
                                 )}
                             >
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1.5 md:gap-2">
                                     <div className={cn(
-                                        "w-2 h-2 rounded-full transition-all",
+                                        "w-1.5 h-1.5 md:w-2 md:h-2 rounded-full transition-all",
                                         obra_activa === obra.id ? "bg-white" : "bg-[#6f668e] group-hover:bg-[#f6a020]"
                                     )} />
                                     <span className="truncate font-medium">{obra.nombre_obra || obra.id.slice(0, 6)}</span>
@@ -236,8 +236,8 @@ export function Sidebar({ isCollapsed, onToggle }) {
                             </button>
                         ))}
                         {obras.length === 0 && (
-                            <div className="w-full text-center py-4 text-xs text-[#8f8aa0]">
-                                <Building2 className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                            <div className="w-full text-center py-3 md:py-4 text-[10px] md:text-xs text-[#8f8aa0]">
+                                <Building2 className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-1 md:mb-2 opacity-30" />
                                 Sin obras disponibles
                             </div>
                         )}
@@ -245,38 +245,38 @@ export function Sidebar({ isCollapsed, onToggle }) {
                 </div>
 
                 {/* Separador visual */}
-                <div className="h-px bg-[#1c1837] my-2" />
+                <div className="h-px bg-[#1c1837] my-1 md:my-2" />
 
                 {/* Sección: Inspecciones */}
-                <div className="space-y-2">
+                <div className="space-y-1.5 md:space-y-2">
                     {!isCollapsed && (
-                        <div className="flex items-center gap-2 px-2">
-                            <ClipboardList className="h-4 w-4 text-[#f6a020]" />
-                            <p className="text-xs font-semibold uppercase tracking-wider text-[#c7c4d6]">
+                        <div className="flex items-center gap-1.5 md:gap-2 px-1 md:px-2">
+                            <ClipboardList className="h-3 w-3 md:h-4 md:w-4 text-[#f6a020]" />
+                            <p className="text-[10px] md:text-xs font-semibold uppercase tracking-wider text-[#c7c4d6]">
                                 Inspecciones
                             </p>
                             {inspecciones.length > 0 && (
-                                <span className="ml-auto text-xs bg-[#f6a020]/20 text-[#f6a020] px-2 py-0.5 rounded-full font-medium">
+                                <span className="ml-auto text-[10px] md:text-xs bg-[#f6a020]/20 text-[#f6a020] px-1.5 md:px-2 py-0.5 rounded-full font-medium">
                                     {inspecciones.length}
                                 </span>
                             )}
                         </div>
                     )}
-                    <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                    <div className="space-y-1 md:space-y-1.5 max-h-32 md:max-h-40 overflow-y-auto pr-0.5 md:pr-1">
                         {inspecciones.map((ins) => (
                             <div key={ins.id} className="relative group">
                                 <button
                                     onClick={() => on_select_inspeccion(ins.id)}
                                     className={cn(
-                                        "w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all duration-200",
+                                        "w-full text-left px-2 py-1.5 md:px-3 md:py-2.5 rounded-lg md:rounded-xl text-xs md:text-sm transition-all duration-200",
                                         inspeccion_activa === ins.id
                                             ? "bg-gradient-to-r from-[#f6a020] to-[#e59210] text-white shadow-lg shadow-[#f6a020]/30"
                                             : "bg-[#1c1837]/50 text-[#c7c4d6] hover:bg-[#242041] hover:text-white hover:shadow-md"
                                     )}
                                 >
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1.5 md:gap-2">
                                         <div className={cn(
-                                            "w-2 h-2 rounded-full transition-all",
+                                            "w-1.5 h-1.5 md:w-2 md:h-2 rounded-full transition-all",
                                             inspeccion_activa === ins.id ? "bg-white" : "bg-[#6f668e] group-hover:bg-[#f6a020]"
                                         )} />
                                         <span className="truncate font-medium">
@@ -293,16 +293,16 @@ export function Sidebar({ isCollapsed, onToggle }) {
                                 </button>
                                 <button
                                     onClick={() => borrar_inspeccion(ins.id)}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1.5 rounded-lg bg-red-500/90 hover:bg-red-600 text-white"
+                                    className="absolute right-1 md:right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 md:p-1.5 rounded-lg bg-red-500/90 hover:bg-red-600 text-white"
                                     aria-label="Borrar inspección"
                                 >
-                                    <Trash2 className="h-3.5 w-3.5" />
+                                    <Trash2 className="h-3 w-3 md:h-3.5 md:w-3.5" />
                                 </button>
                             </div>
                         ))}
                         {inspecciones.length === 0 && (
-                            <div className="w-full text-center py-4 text-xs text-[#8f8aa0]">
-                                <ClipboardList className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                            <div className="w-full text-center py-3 md:py-4 text-[10px] md:text-xs text-[#8f8aa0]">
+                                <ClipboardList className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-1 md:mb-2 opacity-30" />
                                 {obra_activa ? "Sin inspecciones" : "Selecciona obra"}
                             </div>
                         )}
@@ -310,38 +310,38 @@ export function Sidebar({ isCollapsed, onToggle }) {
                 </div>
 
                 {/* Separador visual */}
-                <div className="h-px bg-[#1c1837] my-2" />
+                <div className="h-px bg-[#1c1837] my-1 md:my-2" />
 
                 {/* Sección: Canales */}
-                <div className="space-y-2">
+                <div className="space-y-1.5 md:space-y-2">
                     {!isCollapsed && (
-                        <div className="flex items-center gap-2 px-2">
-                            <MessageSquare className="h-4 w-4 text-[#f6a020]" />
-                            <p className="text-xs font-semibold uppercase tracking-wider text-[#c7c4d6]">
+                        <div className="flex items-center gap-1.5 md:gap-2 px-1 md:px-2">
+                            <MessageSquare className="h-3 w-3 md:h-4 md:w-4 text-[#f6a020]" />
+                            <p className="text-[10px] md:text-xs font-semibold uppercase tracking-wider text-[#c7c4d6]">
                                 Canales
                             </p>
                             {canales.length > 0 && (
-                                <span className="ml-auto text-xs bg-[#f6a020]/20 text-[#f6a020] px-2 py-0.5 rounded-full font-medium">
+                                <span className="ml-auto text-[10px] md:text-xs bg-[#f6a020]/20 text-[#f6a020] px-1.5 md:px-2 py-0.5 rounded-full font-medium">
                                     {canales.length}
                                 </span>
                             )}
                         </div>
                     )}
-                    <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                    <div className="space-y-1 md:space-y-1.5 max-h-32 md:max-h-40 overflow-y-auto pr-0.5 md:pr-1">
                         {canales.map((c) => (
                             <div key={c.id} className="relative group">
                                 <button
                                     onClick={() => abrir_canal(c.id)}
                                     className={cn(
-                                        "w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all duration-200",
+                                        "w-full text-left px-2 py-1.5 md:px-3 md:py-2.5 rounded-lg md:rounded-xl text-xs md:text-sm transition-all duration-200",
                                         canal_activo === c.id
                                             ? "bg-gradient-to-r from-[#f6a020] to-[#e59210] text-white shadow-lg shadow-[#f6a020]/30"
                                             : "bg-[#1c1837]/50 text-[#c7c4d6] hover:bg-[#242041] hover:text-white hover:shadow-md"
                                     )}
                                 >
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1.5 md:gap-2">
                                         <div className={cn(
-                                            "w-2 h-2 rounded-full transition-all",
+                                            "w-1.5 h-1.5 md:w-2 md:h-2 rounded-full transition-all",
                                             canal_activo === c.id ? "bg-white" : "bg-[#6f668e] group-hover:bg-[#f6a020]"
                                         )} />
                                         <span className="truncate font-medium">{c.nombre || c.id.slice(0, 6)}</span>
@@ -349,16 +349,16 @@ export function Sidebar({ isCollapsed, onToggle }) {
                                 </button>
                                 <button
                                     onClick={() => borrar_canal(c.id)}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1.5 rounded-lg bg-red-500/90 hover:bg-red-600 text-white"
+                                    className="absolute right-1 md:right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 md:p-1.5 rounded-lg bg-red-500/90 hover:bg-red-600 text-white"
                                     aria-label="Borrar canal"
                                 >
-                                    <Trash2 className="h-3.5 w-3.5" />
+                                    <Trash2 className="h-3 w-3 md:h-3.5 md:w-3.5" />
                                 </button>
                             </div>
                         ))}
                         {canales.length === 0 && (
-                            <div className="w-full text-center py-4 text-xs text-[#8f8aa0]">
-                                <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                            <div className="w-full text-center py-3 md:py-4 text-[10px] md:text-xs text-[#8f8aa0]">
+                                <MessageSquare className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-1 md:mb-2 opacity-30" />
                                 {inspeccion_activa ? "Sin canales" : "Selecciona inspección"}
                             </div>
                         )}
@@ -367,9 +367,9 @@ export function Sidebar({ isCollapsed, onToggle }) {
             </div>
 
             {/* Footer fijo en la parte inferior */}
-            <div className="p-4 border-t border-[#1c1837]">
-                <div className="flex items-center gap-3 text-sm text-[#dcd8ec]">
-                    <span className="h-8 w-8 rounded-full border border-[#1c1837] flex items-center justify-center">?</span>
+            <div className="p-2 md:p-4 border-t border-[#1c1837]">
+                <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm text-[#dcd8ec]">
+                    <span className="h-6 w-6 md:h-8 md:w-8 rounded-full border border-[#1c1837] flex items-center justify-center text-xs md:text-base">?</span>
                     {!isCollapsed && <span>Ayuda y soporte</span>}
                 </div>
             </div>

@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { FileText, AlertTriangle, Building2, ClipboardCheck, ClipboardList } from "lucide-react"
+import { FileText, AlertTriangle, Building2, ClipboardCheck, ClipboardList, Download, FileDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import DetalleInspeccionModal from "@/components/detalle_inspeccion_modal"
 
 const api_fetch = async (url, body = {}) => {
     const res = await fetch(url, {
@@ -27,6 +28,8 @@ export default function MisInspecciones({ u_nombre, u_rol }) {
     })
     const [cargando, set_cargando] = useState(false)
     const [error, set_error] = useState("")
+    const [modalOpen, setModalOpen] = useState(false)
+    const [inspeccionSeleccionada, setInspeccionSeleccionada] = useState(null)
 
     const cargar_datos = async () => {
         try {
@@ -46,6 +49,29 @@ export default function MisInspecciones({ u_nombre, u_rol }) {
         cargar_datos()
     }, [])
 
+    const abrirDetalle = (inspeccionId) => {
+        setInspeccionSeleccionada(inspeccionId)
+        setModalOpen(true)
+    }
+
+    const descargarImagen = () => {
+        const link = document.createElement('a')
+        link.href = '/important_files/namku_kpis_inspecciones.jpeg'
+        link.download = 'reporte_kpis_inspecciones.jpeg'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    }
+
+    const descargarPDF = (inspeccionId) => {
+        const link = document.createElement('a')
+        link.href = '/important_files/reporte_inspeccion.pdf'
+        link.download = `reporte_inspeccion_${inspeccionId}.pdf`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-4 md:p-6 -mt-15 rounded-2xl">
             {/* Header */}
@@ -54,12 +80,21 @@ export default function MisInspecciones({ u_nombre, u_rol }) {
                     <h1 className="text-2xl md:text-3xl font-bold text-[#1f1b2f] dark:text-white">
                         Mis Inspecciones
                     </h1>
-                    <Button
-                        onClick={() => router.push("/namku/home")}
-                        className="bg-[#6f668e] hover:bg-[#7d759f] text-white rounded-lg px-4 py-2 shadow-md"
-                    >
-                        Volver al Chat
-                    </Button>
+                    <div className="flex gap-3">
+                        <Button
+                            onClick={descargarImagen}
+                            className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 text-white rounded-lg px-4 py-2 shadow-md flex items-center gap-2"
+                        >
+                            <Download className="h-4 w-4" />
+                            Descargar Reporte KPIs
+                        </Button>
+                        <Button
+                            onClick={() => router.push("/namku/home")}
+                            className="bg-[#6f668e] hover:bg-[#7d759f] text-white rounded-lg px-4 py-2 shadow-md"
+                        >
+                            Volver al Chat
+                        </Button>
+                    </div>
                 </div>
                 <p className="text-sm text-[#5a556c] dark:text-[#c7c4d6]">
                     Hola {u_nombre}, aquí tienes un resumen de tus inspecciones
@@ -180,12 +215,16 @@ export default function MisInspecciones({ u_nombre, u_rol }) {
                                     <th className="px-4 md:px-6 py-3 md:py-4 text-left text-xs font-semibold text-[#5a556c] dark:text-[#c7c4d6] uppercase tracking-wider hidden md:table-cell">
                                         Críticos
                                     </th>
+                                    <th className="px-4 md:px-6 py-3 md:py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                        Reporte
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
                                 {inspecciones.map((insp) => (
                                     <tr
                                         key={insp.id}
+                                        onClick={() => abrirDetalle(insp.id)}
                                         className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
                                     >
                                         <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-[#1f1b2f] dark:text-white">
@@ -215,6 +254,18 @@ export default function MisInspecciones({ u_nombre, u_rol }) {
                                                 {(parseInt(insp.hallazgos_importantes) || 0) + (parseInt(insp.hallazgos_intolerables) || 0)}
                                             </span>
                                         </td>
+                                        <td className="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-center">
+                                            <Button
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    descargarPDF(insp.id)
+                                                }}
+                                                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white rounded-lg px-3 py-1 text-xs shadow-md flex items-center gap-1 mx-auto"
+                                            >
+                                                <FileDown className="h-3 w-3" />
+                                                PDF
+                                            </Button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -222,6 +273,13 @@ export default function MisInspecciones({ u_nombre, u_rol }) {
                     </div>
                 )}
             </div>
+
+            {/* Modal de Detalle */}
+            <DetalleInspeccionModal
+                open={modalOpen}
+                onOpenChange={setModalOpen}
+                inspeccionId={inspeccionSeleccionada}
+            />
         </div>
     )
 }

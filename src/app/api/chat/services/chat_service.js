@@ -283,3 +283,42 @@ export async function mis_inspecciones_service(payload = {}) {
 
     return { data: { inspecciones, kpis }, status: 200 }
 }
+
+export async function obtener_detalle_inspeccion_service(payload) {
+    const session = await get_session()
+    if (!session) return { error: "No autorizado", status: 401 }
+
+    const { inspeccion_id } = payload || {}
+    if (!inspeccion_id) return { error: "inspeccion_id requerido", status: 400 }
+
+    const { obtener_detalle_inspeccion_repo, obtener_hallazgos_por_inspeccion_repo } = await import("@/repository/chat_repository")
+
+    // Obtener detalle de la inspección
+    const inspeccion = await obtener_detalle_inspeccion_repo(inspeccion_id)
+    if (!inspeccion) return { error: "Inspección no encontrada", status: 404 }
+
+    // Obtener canales
+    const canales = await obtener_canales_por_inspeccion_repo(inspeccion_id)
+
+    // Obtener hallazgos
+    const hallazgos = await obtener_hallazgos_por_inspeccion_repo(inspeccion_id)
+
+    // Agrupar hallazgos por criticidad
+    const hallazgos_por_criticidad = {
+        TRIVIAL: hallazgos.filter(h => h.criticidad === 'TRIVIAL'),
+        TOLERABLE: hallazgos.filter(h => h.criticidad === 'TOLERABLE'),
+        MODERADO: hallazgos.filter(h => h.criticidad === 'MODERADO'),
+        IMPORTANTE: hallazgos.filter(h => h.criticidad === 'IMPORTANTE'),
+        INTOLERABLE: hallazgos.filter(h => h.criticidad === 'INTOLERABLE')
+    }
+
+    return {
+        data: {
+            inspeccion,
+            canales,
+            hallazgos,
+            hallazgos_por_criticidad
+        },
+        status: 200
+    }
+}
