@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { ChevronLeft, CirclePlus, Trash2, Building2, ClipboardList, MessageSquare } from "lucide-react"
+import { ChevronLeft, CirclePlus, Trash2, Building2, ClipboardList, MessageSquare, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useSession } from "next-auth/react"
 import { CrearInspeccionModal } from "@/components/inspeccion/crear_inspeccion_modal"
@@ -23,6 +23,7 @@ const api_fetch = async (url, body = {}) => {
 export function Sidebar({ isCollapsed, onToggle }) {
     const { data: session } = useSession()
     const router = useRouter()
+    const search_params = useSearchParams()
     const [obras, set_obras] = useState([])
     const [inspecciones, set_inspecciones] = useState([])
     const [canales, set_canales] = useState([])
@@ -32,6 +33,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
     const [error, set_error] = useState("")
     const [modal_abierto, set_modal_abierto] = useState(false)
     const [nuevo_canal, set_nuevo_canal] = useState({ nombre: "", descripcion: "" })
+    const [sincronizado, set_sincronizado] = useState(false)
 
     const cargar_obras = async () => {
         try {
@@ -61,9 +63,37 @@ export function Sidebar({ isCollapsed, onToggle }) {
         }
     }
 
+    const sincronizar_sidebar_con_url = async (canal_id) => {
+        if (!canal_id || sincronizado) return
+        try {
+            const { info_canal } = await api_fetch("/api/chat/obtener_mensajes", { canal_id, limit: 1 })
+            if (info_canal) {
+                set_canal_activo(canal_id)
+                if (info_canal.inspeccion_id) {
+                    set_inspeccion_activa(info_canal.inspeccion_id)
+                    await cargar_canales(info_canal.inspeccion_id)
+                }
+                if (info_canal.obra_id) {
+                    set_obra_activa(info_canal.obra_id)
+                    await cargar_inspecciones(info_canal.obra_id)
+                }
+                set_sincronizado(true)
+            }
+        } catch (err) {
+            console.error("Error sincronizando sidebar:", err)
+        }
+    }
+
     useEffect(() => {
         cargar_obras()
     }, [])
+
+    useEffect(() => {
+        const canal_id = search_params.get("canal_id")
+        if (canal_id && !sincronizado) {
+            sincronizar_sidebar_con_url(canal_id)
+        }
+    }, [search_params, sincronizado])
 
     const limpiar_mensajes = () => {
         set_canal_activo("")
@@ -159,6 +189,14 @@ export function Sidebar({ isCollapsed, onToggle }) {
                     {!isCollapsed && "Nueva Inspección"}
                 </Button>
 
+                <Button
+                    className="w-full bg-[#4a4168] hover:bg-[#5a516e] text-white rounded-full py-3 font-medium shadow-md flex items-center justify-center gap-2"
+                    onClick={() => router.push("/namku/mis-inspecciones")}
+                >
+                    <FileText className="h-5 w-5" />
+                    {!isCollapsed && "Mis Inspecciones"}
+                </Button>
+
                 {!isCollapsed && error && <div className="text-xs text-red-300 bg-red-900/30 border border-red-700 rounded-lg p-2">{error}</div>}
 
                 {/* Sección: Obras */}
@@ -241,7 +279,16 @@ export function Sidebar({ isCollapsed, onToggle }) {
                                             "w-2 h-2 rounded-full transition-all",
                                             inspeccion_activa === ins.id ? "bg-white" : "bg-[#6f668e] group-hover:bg-[#f6a020]"
                                         )} />
-                                        <span className="truncate font-medium">{ins.codigo || ins.id.slice(0, 6)}</span>
+                                        <span className="truncate font-medium">
+                                            {ins.fecha_creacion
+                                                ? new Date(ins.fecha_creacion).toLocaleDateString('es-CL', {
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    year: 'numeric'
+                                                  })
+                                                : ins.id.slice(0, 6)
+                                            }
+                                        </span>
                                     </div>
                                 </button>
                                 <button

@@ -23,7 +23,8 @@ export async function bot_detector_hallazgo(mensaje){
     if (!archivo_ruta) return {error: "Mensaje no cumple con formato hallazgo."}
 
     // Obtener canal por canal_id
-    const canal = await select_canal_by_canal_id(canal_id)
+    const canales = await select_canal_by_canal_id(canal_id)
+    const canal = canales?.[0]
     if (!canal) return { error: "El canal no existe.", status: 400 }
 
     // Obtener inspeccion_id de canal
@@ -43,38 +44,45 @@ export async function bot_detector_hallazgo(mensaje){
         // orden -> criticidad, recomendacion
         cont_copy = contenido.toLowerCase();
         // criticidad
-        criticidad = cont_copy.split("criticidad ")[1];
-        criticidad = criticidad.split(" ")[0];
+        let crit = cont_copy.split("criticidad ")[1];
+        if (crit) {
+            crit = crit.split(" ")[0];
+        }
 
         // recomendacion
-        recomendacion = cont_copy.split("recomendacion ")[1];
-        
-        return criticidad, recomendacion
+        let rec = cont_copy.split("recomendacion ")[1];
+
+        return { criticidad: crit, recomendacion: rec }
     };
 
-    criticidad, recomendacion = splitear(contenido);
+    const resultado = splitear(contenido);
+    criticidad = resultado.criticidad;
+    recomendacion = resultado.recomendacion;
     if (criticidad == undefined || criticidad == null) {
         return {error: "Mensaje no cumple con formato hallazgo."}
     }
 
-    if (criticidad == "trivial") {
+    // Convertir criticidad a mayúsculas para coincidir con el array CRITICIDAD
+    criticidad = criticidad.toUpperCase();
+
+    // Mapear "INMEDIATO" a "INTOLERABLE" si es necesario
+    if (criticidad === "INMEDIATO") {
+        criticidad = "INTOLERABLE";
+    }
+
+    // Asignar días según criticidad
+    if (criticidad === "TRIVIAL") {
         dias = 7
-    }
-
-    if (criticidad == "tolerable") {
+    } else if (criticidad === "TOLERABLE") {
         dias = 5;
-    }
-
-    if (criticidad == "moderado") {
+    } else if (criticidad === "MODERADO") {
         dias = 3;
-    }
-
-    if (criticidad == "importante") {
+    } else if (criticidad === "IMPORTANTE") {
         dias = 1;
-    }
-
-    if (criticidad == "inmediato") {
+    } else if (criticidad === "INTOLERABLE") {
         dias = 0;
+    } else {
+        return {error: "Criticidad no válida. Usa: trivial, tolerable, moderado, importante, o intolerable"}
     }
 
     // Cálculo de fecha_cierre
@@ -84,8 +92,8 @@ export async function bot_detector_hallazgo(mensaje){
     fecha_cierre.setDate(fecha_cierre.getDate() + dias);
 
     // Creacion del hallazgo
-    const res = await crear_hallazgo_service({inspeccion_id, contenido, criticidad, archivo_url, fecha_cierre});
-    if (res.error) return { error: error, status: 400 }
+    const res = await crear_hallazgo_service({inspeccion_id, descripcion: contenido, criticidad, ruta_imagen: archivo_ruta, fecha_cierre});
+    if (res.error) return { error: res.error, status: 400 }
 
     return res;
 };

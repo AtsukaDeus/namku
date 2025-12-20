@@ -1,3 +1,5 @@
+
+
 export const obtener_mensaje_ayuda = (canal_id) => ({
     id: "ayuda-template",
     canal_id: canal_id,

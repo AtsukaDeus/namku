@@ -254,3 +254,32 @@ export async function crear_hallazgo_service(payload) {
 
     return {data: {hallazgo_id}, status: 201}
 }
+
+export async function mis_inspecciones_service(payload = {}) {
+    const session = await get_session()
+    if (!session) return { error: "No autorizado", status: 401 }
+
+    const usuario_id = session.user?.id
+    if (!usuario_id) return { error: "Usuario no encontrado", status: 401 }
+
+    const { limit = 100 } = payload || {}
+    const { obtener_mis_inspecciones_repo } = await import("@/repository/chat_repository")
+
+    const inspecciones = await obtener_mis_inspecciones_repo({ usuario_id, limit })
+
+    // Calcular KPIs
+    const total_inspecciones = inspecciones.length
+    const total_hallazgos = inspecciones.reduce((acc, insp) => acc + (parseInt(insp.total_hallazgos) || 0), 0)
+    const hallazgos_criticos = inspecciones.reduce((acc, insp) =>
+        acc + (parseInt(insp.hallazgos_importantes) || 0) + (parseInt(insp.hallazgos_intolerables) || 0), 0)
+    const obras_unicas = new Set(inspecciones.map(i => i.obra_id).filter(Boolean)).size
+
+    const kpis = {
+        total_inspecciones,
+        total_hallazgos,
+        hallazgos_criticos,
+        obras_unicas
+    }
+
+    return { data: { inspecciones, kpis }, status: 200 }
+}

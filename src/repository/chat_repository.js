@@ -246,6 +246,7 @@ export async function obtener_info_canal_repo(canal_id) {
             i.id as inspeccion_id,
             i.codigo as inspeccion_codigo,
             i.participantes as inspeccion_participantes,
+            o.id as obra_id,
             o.nombre_obra as obra_nombre
         FROM canales c
         LEFT JOIN inspecciones i ON c.inspeccion_id = i.id
@@ -256,20 +257,50 @@ export async function obtener_info_canal_repo(canal_id) {
     return res?.[0]
 }
 
-export async function crear_hallazgo_repo(inspeccion_id, descripcion, criticidad, ruta_imagen) {
+export async function crear_hallazgo_repo(inspeccion_id, descripcion, criticidad, ruta_imagen, fecha_cierre) {
     const sql = `
         INSERT INTO hallazgo (inspeccion_id, descripcion, criticidad, ruta_imagen, fecha_cierre)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING id
     `
-    const res = await query(sql, [inspeccion_id, descripcion, criticidad, ruta_imagen])
+    const res = await query(sql, [inspeccion_id, descripcion, criticidad, ruta_imagen, fecha_cierre])
     return res?.[0]?.id
 }
 
 
 export async function select_canal_by_canal_id(canal_id) {
     const sql = `
-        SELECT * FROM canales WHERE id = ?;
+        SELECT * FROM canales WHERE id = $1
     `
-    return  await query(sql, [canal_id])
+    return await query(sql, [canal_id])
+}
+
+export async function obtener_mis_inspecciones_repo({ usuario_id, limit = 100 }) {
+    const safe_limit = Math.max(1, Math.min(parseInt(limit) || 100, 200))
+    const sql = `
+        SELECT
+            i.id,
+            i.codigo,
+            i.participantes,
+            i.fecha_creacion,
+            i.obra_id,
+            o.nombre_obra,
+            o.tipo_obra,
+            COUNT(DISTINCT c.id) as total_canales,
+            COUNT(DISTINCT h.id) as total_hallazgos,
+            COUNT(DISTINCT CASE WHEN h.criticidad = 'TRIVIAL' THEN h.id END) as hallazgos_triviales,
+            COUNT(DISTINCT CASE WHEN h.criticidad = 'TOLERABLE' THEN h.id END) as hallazgos_tolerables,
+            COUNT(DISTINCT CASE WHEN h.criticidad = 'MODERADO' THEN h.id END) as hallazgos_moderados,
+            COUNT(DISTINCT CASE WHEN h.criticidad = 'IMPORTANTE' THEN h.id END) as hallazgos_importantes,
+            COUNT(DISTINCT CASE WHEN h.criticidad = 'INTOLERABLE' THEN h.id END) as hallazgos_intolerables
+        FROM inspecciones i
+        LEFT JOIN obras o ON i.obra_id = o.id
+        LEFT JOIN canales c ON c.inspeccion_id = i.id
+        LEFT JOIN hallazgo h ON h.inspeccion_id = i.id
+        WHERE i.encargado_id = $1
+        GROUP BY i.id, i.codigo, i.participantes, i.fecha_creacion, i.obra_id, o.nombre_obra, o.tipo_obra
+        ORDER BY i.fecha_creacion DESC
+        LIMIT ${safe_limit}
+    `
+    return await query(sql, [usuario_id])
 }

@@ -16,26 +16,27 @@ const pedir_input = (pregunta) => {
 }
 
 const validar_args = (args) => {
-    const [nombre, email, contrasena, rol] = args
+    const [nombre, email, celular, contrasena, rol] = args
     if (!nombre) throw new Error("Falta nombre")
     if (!email) throw new Error("Falta email")
+    if (!celular) throw new Error("Falta celular")
     if (!contrasena) throw new Error("Falta contraseña")
     if (!rol || !["admin", "prevencionista", "encargado", "usuario"].includes(rol)) {
         throw new Error("Rol inválido (admin, prevencionista, encargado, usuario)")
     }
-    return { nombre, email, contrasena, rol }
+    return { nombre, email, celular, contrasena, rol }
 }
 
-const crear_usuario = async ({ nombre, email, contrasena, rol }) => {
+const crear_usuario = async ({ nombre, email, celular, contrasena, rol }) => {
     const contrasena_hash = await hash(contrasena, 10)
 
     // La tabla define columnas: nombre, email, contrasena (texto), rol, activo
     const sql = `
-        INSERT INTO usuarios (nombre, email, contrasena, rol, activo)
-        VALUES ($1, $2, $3, $4, TRUE)
+        INSERT INTO usuarios (nombre, email, celular, contrasena, rol, activo)
+        VALUES ($1, $2, $3, $4, $5, TRUE)
         RETURNING id, email, rol
     `
-    const res = await query(sql, [nombre, email, contrasena_hash, rol])
+    const res = await query(sql, [nombre, email, celular, contrasena_hash, rol])
     return res?.[0]
 }
 
@@ -50,9 +51,10 @@ const main = async () => {
             console.log("Faltan datos, los pediremos ahora...")
             const nombre = await pedir_input("Nombre: ")
             const email = await pedir_input("Email: ")
+            const celular = await pedir_input("Celular: ")
             const contrasena = await pedir_input("Contraseña: ")
             const rol = await pedir_input("Rol (admin/prevencionista/encargado/usuario): ")
-            data = validar_args([nombre, email, contrasena, rol])
+            data = validar_args([nombre, email, celular, contrasena, rol])
         }
 
         const usuario = await crear_usuario(data)

@@ -41,6 +41,35 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Colores estándar Tailwind */
+  --color-orange-500: #f97316;
+  --color-purple-500: #a855f7;
+  --color-red-500: #ef4444;
+  --color-green-500: #22c55e;
+  --color-blue-500: #3b82f6;
+  --color-blue-800: #1e40af;
+  --color-blue-900: #1e3a8a;
+  --color-blue-100: #dbeafe;
+  --color-blue-200: #bfdbfe;
+  --color-blue-300: #93c5fd;
+  --color-red-800: #991b1b;
+  --color-red-900: #7f1d1d;
+  --color-red-100: #fee2e2;
+  --color-red-200: #fecaca;
+  --color-red-300: #fca5a5;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-900: #111827;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-white: #ffffff;
 }
 
 :root {
@@ -302,4 +331,21 @@
 
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #6b7280;
+}
+
+/* Colores para iconos - fix para dark mode */
+.icon-orange {
+  background-color: #f97316 !important;
+}
+
+.icon-purple {
+  background-color: #a855f7 !important;
+}
+
+.icon-red {
+  background-color: #ef4444 !important;
+}
+
+.icon-green {
+  background-color: #22c55e !important;
 }
