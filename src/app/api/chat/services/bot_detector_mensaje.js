@@ -14,7 +14,6 @@ export async function bot_detector_hallazgo(mensaje){
         usuario_nombre,
         usuario_rol,
         contenido,
-        tipo,
         archivo_url,
         archivo_ruta,
     } = mensaje;
@@ -90,5 +89,3 @@ export async function bot_detector_hallazgo(mensaje){
 
     return res;
 };
-
-
