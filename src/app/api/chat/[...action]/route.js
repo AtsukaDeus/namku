@@ -26,6 +26,8 @@ export async function POST(req, { params }) {
     if (action_path === "borrar_obra") return borrar_obra.POST(req)
     if (action_path === "borrar_inspeccion") return borrar_inspeccion.POST(req)
     if (action_path === "borrar_canal") return borrar_canal.POST(req)
+    
+    if (action_path === "crear_hallazgo") return crear_hallazgo.POST(req)
 
     return NextResponse.json({ error: "Ruta no encontrada", action }, { status: 404 })
 }

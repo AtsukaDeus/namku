@@ -11,7 +11,7 @@ export default async function HomePage() {
 
     return (
     <>
-    <Home u_nombre={session.user.nombre} u_rol={user_role} />
-    <p className="text-sm text-[#1f1b2f] dark:text-white mt-3 ml-3">Auspiciado por Grupo de la Rivera</p>
+        <Home u_nombre={session.user.nombre} u_rol={user_role} />
+        <p className="text-sm text-[#1f1b2f] dark:text-white mt-3 ml-3">Auspiciado por @AtsukaDeus y Grupo de la Rivera</p>
     </>);
 }

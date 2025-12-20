@@ -120,21 +120,28 @@ export async function obtener_mensajes_repo(canal_id, limit = 50) {
         SELECT *
         FROM mensajes
         WHERE canal_id = $1
-        ORDER BY fecha_creacion ASC
+        ORDER BY fecha_creacion DESC
         LIMIT ${safe_limit}
     `
     return await query(sql, [canal_id])
 }
 
-export async function obtener_inspecciones_repo(limit = 50) {
+export async function obtener_inspecciones_repo({ limit = 50, obra_id = null } = {}) {
     const safe_limit = Math.max(1, Math.min(parseInt(limit) || 50, 200))
-    const sql = `
+    let sql = `
         SELECT *
         FROM inspecciones
+    `
+    const params = []
+    if (obra_id) {
+        sql += ` WHERE obra_id = $1`
+        params.push(obra_id)
+    }
+    sql += `
         ORDER BY fecha_creacion DESC
         LIMIT ${safe_limit}
     `
-    return await query(sql)
+    return await query(sql, params)
 }
 
 export async function obtener_canales_por_inspeccion_repo(inspeccion_id) {
@@ -230,4 +237,41 @@ export async function borrar_obra_repo(obra_id) {
     `
     const res = await query(sql, [obra_id])
     return res?.[0]
+}
+
+export async function obtener_info_canal_repo(canal_id) {
+    const sql = `
+        SELECT
+            c.id as canal_id,
+            c.nombre as canal_nombre,
+            c.descripcion as canal_descripcion,
+            i.id as inspeccion_id,
+            i.codigo as inspeccion_codigo,
+            i.participantes as inspeccion_participantes,
+            o.nombre_obra as obra_nombre
+        FROM canales c
+        LEFT JOIN inspecciones i ON c.inspeccion_id = i.id
+        LEFT JOIN obras o ON i.obra_id = o.id
+        WHERE c.id = $1
+    `
+    const res = await query(sql, [canal_id])
+    return res?.[0]
+}
+
+export async function crear_hallazgo_repo(inspeccion_id, descripcion, criticidad, ruta_imagen) {
+    const sql = `
+        INSERT INTO hallazgo (inspeccion_id, descripcion, criticidad, ruta_imagen)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id
+    `
+    const res = await query(sql, [inspeccion_id, descripcion, criticidad, ruta_imagen])
+    return res?.[0]?.id
+}
+
+
+export async function select_canal_by_canal_id(canal_id) {
+    const sql = `
+        SELECT * FROM canales WHERE id = ?;
+    `
+    return  await query(sql, [canal_id])
 }
