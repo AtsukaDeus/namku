@@ -87,12 +87,11 @@ export async function enviar_mensaje_service(payload) {
 
     const canal_id = payload.get('canal_id')
     const contenido = payload.get('contenido')
-    const tipo = "texto"
     const imagen = payload.get('imagen')
     //const { canal_id, contenido, tipo = "texto", imagen } = payload || {}
     if (!canal_id) return { error: "canal_id requerido", status: 400 }
     if (!es_uuid(canal_id)) return { error: "canal_id inválido", status: 400 }
-    if (tipo === "texto" && (!contenido || !contenido.trim())) return { error: "contenido requerido", status: 400 }
+    if ((!contenido || !contenido.trim())) return { error: "contenido requerido", status: 400 }
 
     
     let archivo_url = null
@@ -117,7 +116,6 @@ export async function enviar_mensaje_service(payload) {
         usuario_nombre,
         usuario_rol,
         contenido,
-        tipo,
         archivo_url,
         archivo_ruta,
     })
@@ -129,7 +127,6 @@ export async function enviar_mensaje_service(payload) {
         usuario_nombre,
         usuario_rol,
         contenido,
-        tipo,
         archivo_url,
         archivo_ruta,
     })

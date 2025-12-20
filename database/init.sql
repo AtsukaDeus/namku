@@ -232,7 +232,6 @@ CREATE TABLE mensajes (
     usuario_nombre VARCHAR NOT NULL,
     usuario_rol VARCHAR DEFAULT NULL,
     contenido TEXT DEFAULT NULL,
-    tipo VARCHAR NOT NULL CHECK (tipo IN ('texto', 'imagen', 'archivo', 'sistema')),
     archivo_url VARCHAR DEFAULT NULL,
     archivo_ruta VARCHAR DEFAULT NULL,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -247,6 +246,29 @@ ALTER TABLE mensajes
 
 CREATE INDEX idx_mensajes_canal ON mensajes (canal_id, fecha_creacion);
 CREATE INDEX idx_mensajes_usuario ON mensajes (usuario_id);
+
+-- =========================================================
+-- CHAT: LEVANTAMIENTO
+-- =========================================================
+
+CREATE TABLE levantamiento (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    mensaje_id UUID NOT NULL REFERENCES mensajes(id) ON DELETE CASCADE,
+    usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE SET NULL,
+    contenido TEXT DEFAULT NULL,
+    archivo_url VARCHAR DEFAULT NULL,
+    archivo_ruta VARCHAR DEFAULT NULL,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_levantamiento_contenido
+        CHECK (contenido IS NOT NULL OR archivo_url IS NOT NULL)
+);
+
+ALTER TABLE levantamiento
+    ADD CONSTRAINT uk_levantamiento UNIQUE (archivo_url, archivo_ruta);
+
+CREATE INDEX idx_levantamiento_canal ON levantamiento (mensaje_id, fecha_creacion);
+CREATE INDEX idx_levantamiento_usuario ON levantamiento (usuario_id);
 
 -- =========================================================
 -- CHAT: MENSAJES_LEIDOS
@@ -297,4 +319,8 @@ FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 
 CREATE TRIGGER trg_mensajes_update
 BEFORE UPDATE ON mensajes
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER trg_levantamiento_update
+BEFORE UPDATE ON levantamiento
 FOR EACH ROW EXECUTE FUNCTION update_timestamp();
