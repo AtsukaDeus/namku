@@ -1,13 +1,14 @@
 'use client'
 
 // Importaciones de React y hooks
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useRef } from "react"
 import Image from "next/image"
 import { useDropzone } from 'react-dropzone';
 import { useSearchParams } from "next/navigation"
 import { Camera, Image as Imagen, MessageCircle, Plus, Send, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { obtener_mensaje_ayuda } from "@/constants/mensajes_sistema"
 
 // Función auxiliar para llamadas a la API
 const api_fetch = async (url, body = {}) => {
@@ -35,11 +36,14 @@ export default function Home({ u_nombre, u_rol }) {
     const [error, set_error] = useState("")
     const [canal_activo, set_canal_activo] = useState("")
 
-    const [archivo, set_archivo] =useState(null);
+    const [archivo, set_archivo] = useState(null);
 
     // Estados para el modal de imagen
     const [modal_imagen_abierto, set_modal_imagen_abierto] = useState(false)
     const [imagen_modal, set_imagen_modal] = useState("")
+
+    // Ref para el input de la cámara
+    const input_camara_ref = useRef(null)
 
     // const obs_url = "http://127.0.0.1:9001/obtener-img"
     
@@ -50,41 +54,6 @@ export default function Home({ u_nombre, u_rol }) {
         if (desde_url) return desde_url
         return ""
     }, [search_params, canal_activo])
-
-    // Mensaje de ayuda hardcodeado con el formato esperado
-    const mensaje_ayuda = {
-        id: "ayuda-template",
-        canal_id: canal_id,
-        usuario_id: "sistema",
-        usuario_nombre: "Sistema Namku",
-        usuario_rol: "asistente",
-        contenido: `¡Hola! 👋 Soy tu asistente para reportar hallazgos de inspección.
-📝 Para reportar un hallazgo, sigue estos pasos:
-
-🔴 CRITICIDAD (obligatorio):
-criticidad [trivial | tolerable | moderado | importante | inmediato]
-
-📸 IMAGEN (obligatorio):
-Haz clic en el botón ➕ → selecciona "Imagen" → arrastra o selecciona tu foto
-
-💡 RECOMENDACIÓN (opcional):
-recomendacion Describe aquí la acción correctiva o sugerencia
-
-✅ Ejemplo de reporte completo:
-criticidad importante
-recomendacion Se recomienda reforzar la estructura con vigas adicionales antes de continuar con la obra
-📸 [imagen adjunta]
-
-✅ Ejemplo sin recomendación:
-criticidad tolerable
-📸 [imagen adjunta]
-
-⚠️ Recuerda: La criticidad y la imagen son obligatorias. La recomendación es opcional.`,
-        tipo: "texto",
-        archivo_url: null,
-        archivo_ruta: null,
-        fecha_creacion: new Date().toISOString()
-    }
 
     // Función para cargar mensajes del canal
     const cargar_mensajes = async () => {
@@ -98,6 +67,7 @@ criticidad tolerable
             set_error("")
             const { mensajes: mensajes_api, info_canal: info_canal_api } = await api_fetch("/api/chat/obtener_mensajes", { canal_id, limit: 100 })
             // Agregar mensaje de ayuda al inicio
+            const mensaje_ayuda = obtener_mensaje_ayuda(canal_id)
             const mensajes_con_ayuda = [mensaje_ayuda, ...(mensajes_api.reverse() || [])]
             set_mensajes(mensajes_con_ayuda)
             set_info_canal(info_canal_api || null)
@@ -125,6 +95,20 @@ criticidad tolerable
         },
         maxFiles: 1,
     });
+
+    // Función para abrir la cámara
+    const abrir_camara = () => {
+        input_camara_ref.current?.click()
+    }
+
+    // Manejar la captura de foto desde la cámara
+    const manejar_captura_foto = (e) => {
+        const archivo_capturado = e.target.files?.[0]
+        if (archivo_capturado) {
+            set_archivo(archivo_capturado)
+            set_mostrar_opciones(false)
+        }
+    }
     
     // Función para enviar un mensaje
     const manejar_enviar_mensaje = async () => {
@@ -144,6 +128,8 @@ criticidad tolerable
             })
             // await api_fetch_file("/api/chat/enviar_mensaje", { canal_id, contenido: mensaje, imagen: archivo })
             set_mensaje("")
+            set_archivo(null)
+            set_mostrar_dropzone(false)
             await cargar_mensajes()
         } catch (err) {
             set_error(err.message || "No se pudo enviar el mensaje")
@@ -155,26 +141,26 @@ criticidad tolerable
     return (
         // ===== CONTENEDOR PRINCIPAL DEL CHAT =====
         <>
-        <div className="min-h-[calc(90vh-5rem)] overflow-hidden rounded-3xl bg-[#f6f6fb] dark:bg-[#332d4a] border border-[#e1e3ec] dark:border-[#2f2948] shadow-md flex flex-col -mt-15">
+        <div className="relative h-[calc(100vh-8rem)] md:h-[calc(90vh-5rem)] overflow-hidden rounded-2xl md:rounded-3xl bg-[#f6f6fb] dark:bg-[#332d4a] border border-[#e1e3ec] dark:border-[#2f2948] shadow-md flex flex-col">
             {/* Imagen de fondo decorativa */}
             <div className="absolute inset-0 bg-[url('/handshake-line.svg')] bg-center bg-contain bg-no-repeat opacity-20 dark:opacity-10 pointer-events-none" />
 
-                <div className="relative flex flex-col h-full px-6 py-6 md:px-10 md:py-8 space-y-4 flex-1">
+                <div className="relative flex flex-col h-full flex-1">
                     {/* ===== HEADER: Información del canal e inspección ===== */}
-                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-                        <div className="flex items-center gap-4">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-6 px-3 pt-3 md:px-6 md:pt-6 lg:px-10 lg:pt-8 flex-shrink-0">
+                        <div className="flex items-center gap-3 md:gap-4">
                             {/* Icono del chat */}
-                            <div className="h-12 w-12 rounded-full bg-[#f6a020] text-white flex items-center justify-center shadow-lg">
-                                <MessageCircle className="h-6 w-6" />
+                            <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-[#f6a020] text-white flex items-center justify-center shadow-lg flex-shrink-0">
+                                <MessageCircle className="h-5 w-5 md:h-6 md:w-6" />
                             </div>
                             {/* Título y subtítulo con información del canal */}
-                            <div>
+                            <div className="min-w-0 flex-1">
                                 {/* Título: Nombre del canal o saludo */}
-                                <p className="text-lg md:text-xl font-semibold text-[#1f1b2f] dark:text-[#f4f3fb]">
+                                <p className="text-base md:text-lg lg:text-xl font-semibold text-[#1f1b2f] dark:text-[#f4f3fb] truncate">
                                     {info_canal ? `${info_canal.canal_nombre || 'Canal'}` : `¡Hola${u_nombre ? ` ${u_nombre}` : ""}!`}
                                 </p>
                                 {/* Subtítulo: Información de inspección y obra */}
-                                <p className="text-sm text-[#5a556c] dark:text-[#c7c4d6]">
+                                <p className="text-xs md:text-sm text-[#5a556c] dark:text-[#c7c4d6] truncate">
                                     {info_canal ? (
                                         <>
                                             Inspección: {info_canal.inspeccion_codigo || info_canal.inspeccion_participantes || 'Sin código'}
@@ -187,28 +173,28 @@ criticidad tolerable
                     </div>
 
                     {/* ===== CONTENEDOR DE MENSAJES Y PLACEHOLDER ===== */}
-                    <div className="grid grid-cols-1 gap-4 flex-1 min-h-0 mt-0 max-h-[60vh]">
-
-                        <div className={`flex flex-col ${!info_canal ? 'justify-center' : 'justify-end'} gap-3 pb-2`}>
-                            {/* --- PLACEHOLDER: Mensaje cuando no hay canal seleccionado --- */}
-                            {!info_canal ? (
-                                <div className="flex flex-col items-center justify-center flex-1 text-center">
-                                    <div className="bg-[#e7e7f2] dark:bg-[#4a4168] border-2 border-dashed border-[#b6b0c5] dark:border-[#6f668e] rounded-3xl p-16 max-w-md mb-6">
-                                        <MessageCircle className="h-16 w-16 mx-auto text-[#b6b0c5] dark:text-[#6f668e]" />
-                                    </div>
-                                    <h3 className="text-xl font-semibold text-[#1f1b2f] dark:text-[#f4f3fb] mb-3">
-                                        Selecciona una inspección y canal
-                                    </h3>
-                                    <p className="text-sm text-[#5a556c] dark:text-[#c7c4d6]">
-                                        Elige una inspección del sidebar, luego selecciona un canal para comenzar a chatear
-                                    </p>
+                    <div className={`flex-1 overflow-y-auto px-3 md:px-6 lg:px-10 py-3 md:py-4 min-h-0 flex flex-col gap-2 md:gap-3 ${!info_canal ? 'justify-center' : ''}`}>
+                        {/* --- PLACEHOLDER: Mensaje cuando no hay canal seleccionado --- */}
+                        {!info_canal ? (
+                            <div className="flex flex-col items-center justify-center text-center px-4">
+                                <div className="bg-[#e7e7f2] dark:bg-[#4a4168] border-2 border-dashed border-[#b6b0c5] dark:border-[#6f668e] rounded-2xl md:rounded-3xl p-8 md:p-16 max-w-md mb-4 md:mb-6">
+                                    <MessageCircle className="h-12 w-12 md:h-16 md:w-16 mx-auto text-[#b6b0c5] dark:text-[#6f668e]" />
                                 </div>
-                            ) : (
-                            // --- LISTA DE MENSAJES ---
-                            <div className="flex flex-col gap-3 overflow-y-auto pr-1 max-h-[55vh]">
-                                {error && <div className="text-sm text-red-300 bg-red-900/30 border border-red-600 rounded-lg px-3 py-2">{error}</div>}
-                                {cargando && <div className="text-sm text-[#c7c4d6]">Cargando mensajes...</div>}
-                                {!cargando && mensajes.length === 0 && <div className="text-sm text-[#c7c4d6]">Sin mensajes aún.</div>}
+                                <h3 className="text-lg md:text-xl font-semibold text-[#1f1b2f] dark:text-[#f4f3fb] mb-2 md:mb-3">
+                                    Selecciona una inspección y canal
+                                </h3>
+                                <p className="text-xs md:text-sm text-[#5a556c] dark:text-[#c7c4d6] px-2">
+                                    Elige una inspección del sidebar, luego selecciona un canal para comenzar a chatear
+                                </p>
+                            </div>
+                        ) : (
+                        <>
+                            {/* --- MENSAJES DE ERROR/CARGA --- */}
+                            {error && <div className="text-xs md:text-sm text-red-300 bg-red-900/30 border border-red-600 rounded-lg px-2 py-1.5 md:px-3 md:py-2">{error}</div>}
+                            {cargando && <div className="text-xs md:text-sm text-[#c7c4d6]">Cargando mensajes...</div>}
+                            {!cargando && mensajes.length === 0 && <div className="text-xs md:text-sm text-[#c7c4d6]">Sin mensajes aún.</div>}
+
+                            {/* --- LISTA DE MENSAJES --- */}
 
                             {mensajes.map((m) => {
                                 // Verificar si es el mensaje de ayuda del sistema
@@ -253,8 +239,9 @@ criticidad tolerable
                                     </div>
                                 )
                             })}
-                        </div>
-                            )}
+                        </>
+                        )}
+                    </div>
 
                             {/* ===== BARRA DE ENVÍO DE MENSAJES ===== */}
                             {info_canal && (
@@ -264,9 +251,9 @@ criticidad tolerable
                                     <Button
                                         type="button"
                                         onClick={() => {set_mostrar_opciones(!mostrar_opciones); set_mostrar_dropzone(false);} }
-                                        className="bg-[#b6b0c5] hover:bg-[#ada6c0] dark:bg-[#6f668e] dark:hover:bg-[#7d759f] text-white rounded-full h-12 w-12 p-0"
+                                        className="bg-[#b6b0c5] hover:bg-[#ada6c0] dark:bg-[#6f668e] dark:hover:bg-[#7d759f] text-white rounded-full h-10 w-10 md:h-12 md:w-12 p-0"
                                     >
-                                        <Plus className="h-6 w-6" />
+                                        <Plus className="h-5 w-5 md:h-6 md:w-6" />
                                     </Button>
 
                                     {/* Menú de opciones emergente */}
@@ -275,6 +262,7 @@ criticidad tolerable
                                             <Button
                                                 variant="ghost"
                                                 className="w-full justify-start text-[#1f1b2f] dark:text-white hover:bg-[#cac5d6] dark:hover:bg-[#7d759f] gap-2 rounded-xl"
+                                                onClick={abrir_camara}
                                             >
                                                 <Camera className="h-5 w-5" />
                                                 Foto
@@ -289,16 +277,45 @@ criticidad tolerable
                                             </Button>
                                         </div>
                                     )}
+
+                                    {/* Input oculto para captura de cámara */}
+                                    <input
+                                        ref={input_camara_ref}
+                                        type="file"
+                                        accept="image/*"
+                                        capture="environment"
+                                        onChange={manejar_captura_foto}
+                                        className="hidden"
+                                    />
                                     {/* Zona de arrastre para imagen */}
                                     {mostrar_dropzone && (
                                         <div className="absolute -top-62">
                                             <div {...getRootProps({ className: "h-36 w-64 rounded-xl bg-[#d8d5e4] dark:bg-[#4a4168] border border-[#e1e3ec] dark:border-[#2f2948] flex items-center justify-center text-[#5a556c] dark:text-[#c7c4d6] cursor-pointer transition-all hover:bg-[#F2EFFF] dark:hover:bg-[#8c7dbe]" })}>
                                                 <input {...getInputProps()} className="hidden" />
                                                 {archivo ? (
-                                                    <p className="text-center font-medium">{archivo.name}</p>
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <p className="text-center font-medium text-sm">{archivo.name}</p>
+                                                        <p className="text-xs text-[#44404f] dark:text-[#c7c4d6]">✓ Listo para enviar</p>
+                                                    </div>
                                                 ) : (
-                                                    <p className="text-center">Imagen</p>
+                                                    <p className="text-center">Arrastra una imagen o haz clic</p>
                                                 )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Vista previa de imagen seleccionada/capturada */}
+                                    {archivo && !mostrar_dropzone && (
+                                        <div className="absolute bottom-14 left-0 bg-[#d8d5e4] dark:bg-[#4a4168] rounded-xl p-2 shadow-lg">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs text-[#44404f] dark:text-[#c7c4d6]">📸 {archivo.name}</span>
+                                                <button
+                                                    onClick={() => set_archivo(null)}
+                                                    className="text-red-500 hover:text-red-700"
+                                                    aria-label="Eliminar imagen"
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </button>
                                             </div>
                                         </div>
                                     )}
@@ -307,38 +324,36 @@ criticidad tolerable
                                 {/* Campo de entrada de texto para el mensaje */}
                                 <input
                                     type="text"
-                                    placeholder="Enviar"
+                                    placeholder="Enviar Hallazgo..."
                                     value={mensaje}
                                     onChange={(e) => set_mensaje(e.target.value)}
                                     onKeyDown={(e) => e.key === "Enter" && manejar_enviar_mensaje()}
-                                    className="flex-1 bg-transparent text-[#1f1b2f] dark:text-white placeholder-[#7a758a] dark:placeholder-[#d3cfe1] rounded-full px-4 py-4 outline-none text-sm"
+                                    className="flex-1 bg-transparent text-[#1f1b2f] dark:text-white placeholder-[#7a758a] dark:placeholder-[#d3cfe1] rounded-full px-3 py-2 md:px-4 md:py-4 outline-none text-sm"
                                 />
 
                                 {/* Botón para enviar el mensaje */}
                                 <Button
                                     onClick={manejar_enviar_mensaje}
-                                    className="bg-[#f6a020] hover:bg-[#e59210] text-white rounded-full h-12 w-12 p-0 shadow-md"
+                                    className="bg-[#f6a020] hover:bg-[#e59210] text-white rounded-full h-10 w-10 md:h-12 md:w-12 p-0 shadow-md flex-shrink-0"
                                 >
-                                    <Send className="h-5 w-5" />
+                                    <Send className="h-4 w-4 md:h-5 md:w-5" />
                                 </Button>
                             </div>
-                            )}
-                        </div>
-                    </div>
+                    )}
                 </div>
         </div>
 
         {/* Modal para visualizar imagen ampliada */}
         <Dialog open={modal_imagen_abierto} onOpenChange={set_modal_imagen_abierto}>
-            <DialogContent className="max-w-6xl max-h-[95vh] p-0 bg-black/95 border-none">
+            <DialogContent className="max-w-12xl min-w-12xl max-h-[120vh] min-h-[120vh] p-0 bg-black/95 border-none">
                 <DialogTitle className="sr-only">Imagen ampliada</DialogTitle>
-                <div className="relative flex items-center justify-center p-4">
+                <div className="relative flex items-center justify-center p-4 max-w-12xl min-w-12xl max-h-[120vh] min-h-[120vh]">
                     <Image
                         src={imagen_modal}
                         alt="Imagen ampliada"
-                        width={1000}
-                        height={750}
-                        className="max-w-full max-h-full object-contain rounded-lg"
+                        width={1500}
+                        height={1200}
+                        className="object-contain rounded-lg max-w-12xl min-w-12xl max-h-[120vh] min-h-[120vh]"
                     />
                 </div>
             </DialogContent>

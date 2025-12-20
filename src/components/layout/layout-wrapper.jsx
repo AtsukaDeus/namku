@@ -51,7 +51,7 @@ export function LayoutWrapper({ children }) {
       {/* Main Content */}
       <main
         className={cn(
-          "transition-all duration-300 ease-in-out pt-16",
+          "transition-all duration-300 ease-in-out pt-16 -mt-15",
           isSidebarCollapsed ? "md:pl-16" : "md:pl-64"
         )}
       >
