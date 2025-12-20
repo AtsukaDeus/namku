@@ -19,6 +19,10 @@ export async function bot_detector_hallazgo(mensaje){
         archivo_ruta,
     } = mensaje;
 
+    // validamos mensaje si es hallazgo
+    if (!archivo_url) return {error: "Mensaje no cumple con formato hallazgo."}
+    if (!archivo_ruta) return {error: "Mensaje no cumple con formato hallazgo."}
+
     // Obtener canal por canal_id
     const canal = await select_canal_by_canal_id(canal_id)
     if (!canal) return { error: "El canal no existe.", status: 400 }
@@ -45,12 +49,14 @@ export async function bot_detector_hallazgo(mensaje){
 
         // recomendacion
         recomendacion = cont_copy.split("recomendacion ")[1];
-        recomendacion = recomendacion.split(" ")[0];
         
         return criticidad, recomendacion
     };
 
     criticidad, recomendacion = splitear(contenido);
+    if (criticidad == undefined || criticidad == null) {
+        return {error: "Mensaje no cumple con formato hallazgo."}
+    }
 
     if (criticidad == "trivial") {
         dias = 7

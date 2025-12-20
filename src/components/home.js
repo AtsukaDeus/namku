@@ -51,6 +51,41 @@ export default function Home({ u_nombre, u_rol }) {
         return ""
     }, [search_params, canal_activo])
 
+    // Mensaje de ayuda hardcodeado con el formato esperado
+    const mensaje_ayuda = {
+        id: "ayuda-template",
+        canal_id: canal_id,
+        usuario_id: "sistema",
+        usuario_nombre: "Sistema Namku",
+        usuario_rol: "asistente",
+        contenido: `¡Hola! 👋 Soy tu asistente para reportar hallazgos de inspección.
+📝 Para reportar un hallazgo, sigue estos pasos:
+
+🔴 CRITICIDAD (obligatorio):
+criticidad: [trivial | tolerable | moderado | importante | inmediato]
+
+📸 IMAGEN (obligatorio):
+Haz clic en el botón ➕ → selecciona "Imagen" → arrastra o selecciona tu foto
+
+💡 RECOMENDACIÓN (opcional):
+recomendacion: Describe aquí la acción correctiva o sugerencia
+
+✅ Ejemplo de reporte completo:
+criticidad: importante
+recomendacion: Se recomienda reforzar la estructura con vigas adicionales antes de continuar con la obra
+📸 [imagen adjunta]
+
+✅ Ejemplo sin recomendación:
+criticidad: tolerable
+📸 [imagen adjunta]
+
+⚠️ Recuerda: La criticidad y la imagen son obligatorias. La recomendación es opcional.`,
+        tipo: "texto",
+        archivo_url: null,
+        archivo_ruta: null,
+        fecha_creacion: new Date().toISOString()
+    }
+
     // Función para cargar mensajes del canal
     const cargar_mensajes = async () => {
         if (!canal_id) {
@@ -62,7 +97,9 @@ export default function Home({ u_nombre, u_rol }) {
             set_cargando(true)
             set_error("")
             const { mensajes: mensajes_api, info_canal: info_canal_api } = await api_fetch("/api/chat/obtener_mensajes", { canal_id, limit: 100 })
-            set_mensajes(mensajes_api.reverse() || [])
+            // Agregar mensaje de ayuda al inicio
+            const mensajes_con_ayuda = [mensaje_ayuda, ...(mensajes_api.reverse() || [])]
+            set_mensajes(mensajes_con_ayuda)
             set_info_canal(info_canal_api || null)
         } catch (err) {
             set_error(err.message || "No se pudo cargar mensajes")
@@ -173,29 +210,49 @@ export default function Home({ u_nombre, u_rol }) {
                                 {cargando && <div className="text-sm text-[#c7c4d6]">Cargando mensajes...</div>}
                                 {!cargando && mensajes.length === 0 && <div className="text-sm text-[#c7c4d6]">Sin mensajes aún.</div>}
 
-                            {mensajes.map((m) => (
-                                // --- MENSAJE INDIVIDUAL ---
-                                <div key={m.id} className="flex justify-end">
-                                    <div className="max-w-3xl bg-[#cbc7d8] dark:bg-[#6f668e] text-[#1f1b2f] dark:text-white rounded-2xl rounded-br-none p-4 shadow-sm">
-                                        {/* Metadatos del mensaje: fecha, hora, usuario */}
-                                        <div className="flex items-center gap-4 text-xs text-[#44404f] dark:text-[#e1def0] mb-2">
-                                            <span>{new Date(m.fecha_creacion).toLocaleDateString()}</span>
-                                            <span>{new Date(m.fecha_creacion).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                                            <span className="font-semibold">{m.usuario_nombre}</span>
-                                        </div>
-                                        {/* Contenido del mensaje */}
-                                        <p className="text-base leading-relaxed whitespace-pre-wrap">{m.contenido}</p>
-                                        {/* Imagen adjunta si existe */}
-                                        {m.archivo_url ? (
-                                            <div className="h-64 w-80 rounded-xl bg-[#d8d5e4] dark:bg-[#4a4168] border border-[#e1e3ec] dark:border-[#2f2948] flex items-center justify-center text-[#5a556c] dark:text-[#c7c4d6] mt-2 cursor-pointer" onClick={() => { set_imagen_modal(m.archivo_url); set_modal_imagen_abierto(true); }}>
-                                                <Image src={m.archivo_url} alt="Imagen" width={200} height={200} className="rounded-lg object-cover" />
-                                                {/* cambiar src por obs_url+m.archivo_url  */}
+                            {mensajes.map((m) => {
+                                // Verificar si es el mensaje de ayuda del sistema
+                                const es_mensaje_sistema = m.id === "ayuda-template"
+
+                                return (
+                                    // --- MENSAJE INDIVIDUAL ---
+                                    <div key={m.id} className={es_mensaje_sistema ? "flex justify-start" : "flex justify-end"}>
+                                        <div className={`max-w-3xl rounded-2xl p-4 shadow-lg ${
+                                            es_mensaje_sistema
+                                                ? "bg-[#6f668e] border-2 border-[#8c7dbe] text-white rounded-bl-none"
+                                                : "bg-[#cbc7d8] dark:bg-[#6f668e] text-[#1f1b2f] dark:text-white rounded-br-none"
+                                        }`}>
+                                            {/* Metadatos del mensaje: fecha, hora, usuario */}
+                                            <div className="flex items-center gap-4 text-xs mb-2">
+                                                {es_mensaje_sistema && (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <div className="h-6 w-6 rounded-full bg-[#f6a020] flex items-center justify-center text-white font-bold text-sm">
+                                                            🤖
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                <span className={es_mensaje_sistema ? "text-[#e1def0]" : "text-[#44404f] dark:text-[#e1def0]"}>
+                                                    {new Date(m.fecha_creacion).toLocaleDateString()}
+                                                </span>
+                                                <span className={es_mensaje_sistema ? "text-[#e1def0]" : "text-[#44404f] dark:text-[#e1def0]"}>
+                                                    {new Date(m.fecha_creacion).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                                </span>
+                                                <span className={`font-semibold ${es_mensaje_sistema ? "text-[#f6a020]" : ""}`}>{m.usuario_nombre}</span>
                                             </div>
-                                        ) : (<></>)}
-                                        
+                                            {/* Contenido del mensaje */}
+                                            <p className="text-base leading-relaxed whitespace-pre-wrap">{m.contenido}</p>
+                                            {/* Imagen adjunta si existe */}
+                                            {m.archivo_url ? (
+                                                <div className="h-64 w-80 rounded-xl bg-[#d8d5e4] dark:bg-[#4a4168] border border-[#e1e3ec] dark:border-[#2f2948] flex items-center justify-center text-[#5a556c] dark:text-[#c7c4d6] mt-2 cursor-pointer" onClick={() => { set_imagen_modal(m.archivo_url); set_modal_imagen_abierto(true); }}>
+                                                    <Image src={m.archivo_url} alt="Imagen" width={200} height={200} className="rounded-lg object-cover" />
+                                                    {/* cambiar src por obs_url+m.archivo_url  */}
+                                                </div>
+                                            ) : (<></>)}
+
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
                             )}
 

@@ -24,7 +24,6 @@ export function CrearInspeccionModal({ abierto, on_cerrar, on_creado }) {
     const [obra_seleccionada_id, set_obra_seleccionada_id] = useState("")
     const [inspeccion_creada_id, set_inspeccion_creada_id] = useState("")
     const [nueva_inspeccion, set_nueva_inspeccion] = useState({ nombre: "", codigo: "" })
-    const [nuevo_canal, set_nuevo_canal] = useState({ nombre: "", descripcion: "" })
     const [nueva_obra, set_nueva_obra] = useState({
         nombre_obra: "",
         tipo_obra: "obra",
@@ -49,7 +48,6 @@ export function CrearInspeccionModal({ abierto, on_cerrar, on_creado }) {
         set_obra_seleccionada_id("")
         set_inspeccion_creada_id("")
         set_nueva_inspeccion({ nombre: "", codigo: "" })
-        set_nuevo_canal({ nombre: "", descripcion: "" })
         set_nueva_obra({
             nombre_obra: "",
             tipo_obra: "obra",
@@ -116,6 +114,7 @@ export function CrearInspeccionModal({ abierto, on_cerrar, on_creado }) {
     const crear_inspeccion = async () => {
         set_cargando(true)
         try {
+            // Crear la inspección
             const { inspeccion } = await api_fetch("/api/chat/crear_inspeccion", {
                 codigo: nueva_inspeccion.codigo || `INS-${Date.now()}`,
                 revision: 1,
@@ -128,40 +127,30 @@ export function CrearInspeccionModal({ abierto, on_cerrar, on_creado }) {
                 participantes: nueva_inspeccion.nombre || session.user.nombre || "equipo",
                 visita: 1
             })
-            if (inspeccion?.id) set_inspeccion_creada_id(inspeccion.id)
+
+            if (!inspeccion?.id) {
+                throw new Error("No se pudo crear la inspección")
+            }
+
+            set_inspeccion_creada_id(inspeccion.id)
+
+            // Crear canal automáticamente con nombre "chat {nombre_usuario}"
+            const nombre_canal = `chat ${session.user.nombre || session.user.email || "usuario"}`
+            await api_fetch("/api/chat/crear_canal", {
+                inspeccion_id: inspeccion.id,
+                nombre: nombre_canal,
+                descripcion: `Canal de chat para ${session.user.nombre || "usuario"}`,
+                usuarios_ids: []
+            })
+
             set_error("")
-            set_paso_actual(3)
+            // Finalizar el proceso
+            finalizar()
         } catch (err) {
             set_error(err.message || "No se pudo crear inspección")
         } finally {
             set_cargando(false)
         }
-    }
-
-    const crear_canal = async () => {
-        if (!nuevo_canal.nombre) {
-            set_error("Ingresa un nombre para el canal")
-            return
-        }
-        set_cargando(true)
-        try {
-            await api_fetch("/api/chat/crear_canal", {
-                inspeccion_id: inspeccion_creada_id,
-                nombre: nuevo_canal.nombre,
-                descripcion: nuevo_canal.descripcion || "",
-                usuarios_ids: []
-            })
-            set_error("")
-            finalizar()
-        } catch (err) {
-            set_error(err.message || "No se pudo crear canal")
-        } finally {
-            set_cargando(false)
-        }
-    }
-
-    const omitir_canal = () => {
-        finalizar()
     }
 
     const finalizar = () => {
@@ -177,14 +166,12 @@ export function CrearInspeccionModal({ abierto, on_cerrar, on_creado }) {
 
     const titulos_pasos = {
         1: "Paso 1: Seleccionar Obra",
-        2: "Paso 2: Crear Inspección",
-        3: "Paso 3: Crear Canal (opcional)"
+        2: "Paso 2: Crear Inspección"
     }
 
     const descripciones_pasos = {
         1: "Selecciona una obra existente o crea una nueva",
-        2: "Completa los datos de la inspección",
-        3: "Opcionalmente crea un canal para esta inspección"
+        2: "Completa los datos de la inspección. Se creará automáticamente un canal de chat."
     }
 
     return (
@@ -201,7 +188,7 @@ export function CrearInspeccionModal({ abierto, on_cerrar, on_creado }) {
 
                 {/* Indicador de pasos */}
                 <div className="flex items-center justify-center gap-2 mb-4">
-                    {[1, 2, 3].map((paso) => (
+                    {[1, 2].map((paso) => (
                         <div
                             key={paso}
                             className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
@@ -355,53 +342,6 @@ export function CrearInspeccionModal({ abierto, on_cerrar, on_creado }) {
                                 <Button
                                     className="flex-1 bg-[#f6a020] hover:bg-[#e59210] text-white"
                                     onClick={crear_inspeccion}
-                                    disabled={cargando}
-                                >
-                                    {cargando ? "Creando..." : "Crear y Continuar"}
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* PASO 3: Crear canal (opcional) */}
-                    {paso_actual === 3 && (
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-[#c7c4d6]">Nombre del canal</label>
-                                <input
-                                    type="text"
-                                    placeholder="Ej: Canal general"
-                                    value={nuevo_canal.nombre}
-                                    onChange={(e) => set_nuevo_canal({ ...nuevo_canal, nombre: e.target.value })}
-                                    className="w-full rounded-lg px-3 py-2 bg-[#1f1a31] border border-[#312b48] text-sm text-white"
-                                    disabled={cargando}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-[#c7c4d6]">Descripción (opcional)</label>
-                                <textarea
-                                    placeholder="Descripción del canal"
-                                    value={nuevo_canal.descripcion}
-                                    onChange={(e) => set_nuevo_canal({ ...nuevo_canal, descripcion: e.target.value })}
-                                    className="w-full rounded-lg px-3 py-2 bg-[#1f1a31] border border-[#312b48] text-sm text-white"
-                                    rows={2}
-                                    disabled={cargando}
-                                />
-                            </div>
-
-                            <div className="flex gap-2 pt-4">
-                                <Button
-                                    variant="ghost"
-                                    className="flex-1 bg-[#1c1837] hover:bg-[#242041] text-white"
-                                    onClick={omitir_canal}
-                                    disabled={cargando}
-                                >
-                                    Omitir
-                                </Button>
-                                <Button
-                                    className="flex-1 bg-[#f6a020] hover:bg-[#e59210] text-white"
-                                    onClick={crear_canal}
                                     disabled={cargando}
                                 >
                                     {cargando ? "Creando..." : "Crear y Finalizar"}

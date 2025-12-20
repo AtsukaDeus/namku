@@ -330,10 +330,11 @@ export function Sidebar({ isCollapsed, onToggle }) {
             <CrearInspeccionModal
                 abierto={modal_abierto}
                 on_cerrar={() => set_modal_abierto(false)}
-                on_creado={(obra_id) => {
+                on_creado={async (obra_id) => {
                     if (obra_id) {
+                        await cargar_obras()
                         set_obra_activa(obra_id)
-                        cargar_inspecciones(obra_id)
+                        await cargar_inspecciones(obra_id)
                     }
                 }}
             />
