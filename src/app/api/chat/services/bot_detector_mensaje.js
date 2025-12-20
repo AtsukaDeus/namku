@@ -72,8 +72,14 @@ export async function bot_detector_hallazgo(mensaje){
         dias = 0;
     }
 
+    // Cálculo de fecha_cierre
+    const hoy = new Date();
+
+    const fecha_cierre = new Date(hoy);
+    fecha_cierre.setDate(fecha_cierre.getDate() + dias);
+
     // Creacion del hallazgo
-    const res = await crear_hallazgo_service({inspeccion_id, contenido, criticidad, archivo_url});
+    const res = await crear_hallazgo_service({inspeccion_id, contenido, criticidad, archivo_url, fecha_cierre});
     if (res.error) return { error: error, status: 400 }
 
     return res;

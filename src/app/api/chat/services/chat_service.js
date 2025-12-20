@@ -241,7 +241,7 @@ export async function crear_hallazgo_service(payload) {
     const session = await get_session()
     if (!session) return { error: "No autorizado", status: 401 }
 
-    const {inspeccion_id, descripcion, criticidad, ruta_imagen} = payload || {}; 
+    const {inspeccion_id, descripcion, criticidad, ruta_imagen, fecha_cierre} = payload || {}; 
     
     // Validaciones
     if (!inspeccion_id) return { error: "inspeccion_id es requerido", status: 400 } 
@@ -252,7 +252,7 @@ export async function crear_hallazgo_service(payload) {
 
     if (!ruta_imagen) return { error: "ruta_imagen es requerido", status: 400 } 
 
-    const hallazgo_id = await crear_hallazgo_repo(inspeccion_id, descripcion, criticidad, ruta_imagen)
+    const hallazgo_id = await crear_hallazgo_repo(inspeccion_id, descripcion, criticidad, ruta_imagen, fecha_cierre)
     if (!hallazgo_id) return { error: "Hubo un error en el servidor al crear el hallazgo", status: 500 }
 
     return {data: {hallazgo_id}, status: 201}

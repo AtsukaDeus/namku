@@ -260,8 +260,8 @@ export async function obtener_info_canal_repo(canal_id) {
 
 export async function crear_hallazgo_repo(inspeccion_id, descripcion, criticidad, ruta_imagen) {
     const sql = `
-        INSERT INTO hallazgo (inspeccion_id, descripcion, criticidad, ruta_imagen)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO hallazgo (inspeccion_id, descripcion, criticidad, ruta_imagen, fecha_cierre)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING id
     `
     const res = await query(sql, [inspeccion_id, descripcion, criticidad, ruta_imagen])
