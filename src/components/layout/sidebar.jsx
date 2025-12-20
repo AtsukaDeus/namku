@@ -86,6 +86,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
 
     useEffect(() => {
         cargar_obras()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
@@ -93,6 +94,7 @@ export function Sidebar({ isCollapsed, onToggle }) {
         if (canal_id && !sincronizado) {
             sincronizar_sidebar_con_url(canal_id)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search_params, sincronizado])
 
     const limpiar_mensajes = () => {

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { usePathname } from "next/navigation"
 import { Navbar } from "./navbar"
-import { Sidebar } from "./sidebar"
+import { SidebarWrapper } from "./sidebar-wrapper"
 import { cn } from "@/lib/utils"
 
 export function LayoutWrapper({ children }) {
@@ -26,7 +26,7 @@ export function LayoutWrapper({ children }) {
 
       {/* Sidebar Desktop */}
       <div className="hidden md:block">
-        <Sidebar
+        <SidebarWrapper
           isCollapsed={isSidebarCollapsed}
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
@@ -40,7 +40,7 @@ export function LayoutWrapper({ children }) {
             onClick={() => setIsMobileSidebarOpen(false)}
           />
           <div className="md:hidden animate-slide-in-left">
-            <Sidebar
+            <SidebarWrapper
               isCollapsed={false}
               onToggle={() => setIsMobileSidebarOpen(false)}
             />

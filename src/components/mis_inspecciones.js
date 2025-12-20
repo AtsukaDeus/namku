@@ -47,6 +47,7 @@ export default function MisInspecciones({ u_nombre, u_rol }) {
 
     useEffect(() => {
         cargar_datos()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const abrirDetalle = (inspeccionId) => {

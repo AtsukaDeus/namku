@@ -131,7 +131,7 @@ CREATE TABLE hallazgo (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     inspeccion_id UUID NOT NULL REFERENCES inspecciones(id) ON DELETE CASCADE,
     descripcion VARCHAR NOT NULL,
-    criticidad VARCHAR NOT NULL CHECK (criticidad IN ('bajo', 'medio', 'alto', 'elevado')),
+    criticidad VARCHAR NOT NULL CHECK (criticidad IN ('TRIVIAL', 'TOLERABLE', 'MODERADO', 'IMPORTANTE', 'INTOLERABLE')),
     ruta_imagen VARCHAR NOT NULL,
     fecha_cierre TIMESTAMP,
     fecha_levantamiento TIMESTAMP,

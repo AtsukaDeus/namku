@@ -24,13 +24,14 @@ export function InputSelect({
     // Filtrar opciones según búsqueda
     useEffect(() => {
         if (search) {
-            const filtered = options.filter(option => 
+            const filtered = options.filter(option =>
                 option.nombre?.toLowerCase().includes(search.toLowerCase())
             )
             set_filtered_options(filtered)
         } else {
             set_filtered_options(options)
         }
+        // eslint-disable-next-line react-hooks/set-state-in-effect
     }, [search, options])
 
     // Cerrar dropdown al hacer click fuera
@@ -49,6 +50,7 @@ export function InputSelect({
         if (value !== undefined && value !== search) {
             set_search(value)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value])
 
     const handle_select = (option) => {

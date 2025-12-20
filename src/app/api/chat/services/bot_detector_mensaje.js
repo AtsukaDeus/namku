@@ -47,10 +47,15 @@ export async function bot_detector_hallazgo(mensaje){
         let crit = cont_copy.split("criticidad ")[1];
         if (crit) {
             crit = crit.split(" ")[0];
+            // Limpiar caracteres especiales como comas, puntos, etc.
+            crit = crit.replace(/[^a-z]/g, '').trim();
         }
 
         // recomendacion
         let rec = cont_copy.split("recomendacion ")[1];
+        if (rec) {
+            rec = rec.trim();
+        }
 
         return { criticidad: crit, recomendacion: rec }
     };
@@ -58,12 +63,14 @@ export async function bot_detector_hallazgo(mensaje){
     const resultado = splitear(contenido);
     criticidad = resultado.criticidad;
     recomendacion = resultado.recomendacion;
-    if (criticidad == undefined || criticidad == null) {
-        return {error: "Mensaje no cumple con formato hallazgo."}
+    if (criticidad == undefined || criticidad == null || criticidad === '') {
+        return {error: "Mensaje no cumple con formato hallazgo. Formato esperado: 'criticidad [tipo], recomendacion [texto]'"}
     }
 
     // Convertir criticidad a mayúsculas para coincidir con el array CRITICIDAD
     criticidad = criticidad.toUpperCase();
+
+    console.log("Criticidad detectada:", criticidad);
 
     // Mapear "INMEDIATO" a "INTOLERABLE" si es necesario
     if (criticidad === "INMEDIATO") {
@@ -84,6 +91,8 @@ export async function bot_detector_hallazgo(mensaje){
     } else {
         return {error: "Criticidad no válida. Usa: trivial, tolerable, moderado, importante, o intolerable"}
     }
+
+    console.log("Días para cierre:", dias);
 
     // Cálculo de fecha_cierre
     const hoy = new Date();

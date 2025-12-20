@@ -69,6 +69,7 @@ export default function DetalleInspeccionModal({ open, onOpenChange, inspeccionI
         if (open && inspeccionId) {
             cargarDetalle()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, inspeccionId])
 
     const cargarDetalle = async () => {

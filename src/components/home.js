@@ -122,10 +122,16 @@ export default function Home({ u_nombre, u_rol }) {
             if (archivo) {
                 formData.append("imagen", archivo);
             }
-            await fetch('/api/chat/enviar_mensaje', {
+            const res = await fetch('/api/chat/enviar_mensaje', {
                 method: "POST",
                 body: formData
             })
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}))
+                throw new Error(data?.error || "Error al enviar el mensaje")
+            }
+
             // await api_fetch_file("/api/chat/enviar_mensaje", { canal_id, contenido: mensaje, imagen: archivo })
             set_mensaje("")
             set_archivo(null)
@@ -341,7 +347,8 @@ export default function Home({ u_nombre, u_rol }) {
                                 {/* Botón para enviar el mensaje */}
                                 <Button
                                     onClick={manejar_enviar_mensaje}
-                                    className="bg-[#f6a020] hover:bg-[#e59210] text-white rounded-full h-8 w-8 md:h-12 md:w-12 p-0 shadow-md"
+                                    disabled={enviando || !mensaje.trim()}
+                                    className="bg-[#f6a020] hover:bg-[#e59210] text-white rounded-full h-8 w-8 md:h-12 md:w-12 p-0 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <Send className="h-4 w-4 md:h-5 md:w-5" />
                                 </Button>

@@ -6,14 +6,27 @@ export function useNotificaciones() {
 
     // Función para obtener el contador (polling cada 30 segundos)
     const fetchContador = useCallback(async (signal) => {
-        const res = await fetch('/api/notificaciones/get_contador', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            signal
-        })
-        const data = await res.json()
-        setCount(data.count || 0)
-        return [data] // useAutoRefresh espera array
+        try {
+            const res = await fetch('/api/notificaciones/get_contador', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                signal
+            })
+
+            if (!res.ok) {
+                console.error('Error obteniendo contador de notificaciones:', res.status)
+                return [{ count: 0 }]
+            }
+
+            const data = await res.json()
+            setCount(data.count || 0)
+            return [data] // useAutoRefresh espera array
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error('Error en fetchContador:', error)
+            }
+            return [{ count: 0 }]
+        }
     }, [])
 
     // Auto-refresh del contador cada 30 segundos
@@ -30,6 +43,12 @@ export function useNotificaciones() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ solo_no_leidas, limit: 20 })
             })
+
+            if (!res.ok) {
+                console.error('Error cargando notificaciones:', res.status)
+                return []
+            }
+
             const data = await res.json()
             return data.notificaciones || []
         } catch (error) {
@@ -40,12 +59,17 @@ export function useNotificaciones() {
 
     const marcarLeida = async (notificacion_id) => {
         try {
-            await fetch('/api/notificaciones/marcar_leida', {
+            const res = await fetch('/api/notificaciones/marcar_leida', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ notificacion_id })
             })
-            
+
+            if (!res.ok) {
+                console.error('Error marcando como leída:', res.status)
+                return
+            }
+
             // Refrescar contador
             setCount(prev => Math.max(0, prev - 1))
             refrescarContador()
@@ -56,11 +80,16 @@ export function useNotificaciones() {
 
     const marcarTodasLeidas = async () => {
         try {
-            await fetch('/api/notificaciones/marcar_todas_leidas', {
+            const res = await fetch('/api/notificaciones/marcar_todas_leidas', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
             })
-            
+
+            if (!res.ok) {
+                console.error('Error marcando todas como leídas:', res.status)
+                return
+            }
+
             setCount(0)
             refrescarContador()
         } catch (error) {

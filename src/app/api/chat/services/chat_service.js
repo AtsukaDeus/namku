@@ -121,18 +121,24 @@ export async function enviar_mensaje_service(payload) {
     })
 
     // Creación del hallazgo
-    const res = await bot_detector_hallazgo({
-        canal_id,
-        usuario_id,
-        usuario_nombre,
-        usuario_rol,
-        contenido,
-        archivo_url,
-        archivo_ruta,
-    })
+    try {
+        const res = await bot_detector_hallazgo({
+            canal_id,
+            usuario_id,
+            usuario_nombre,
+            usuario_rol,
+            contenido,
+            archivo_url,
+            archivo_ruta,
+        })
 
-    if (res.error) {
-        console.log(`Error en la creación del hallazgo: ${res.error}`)
+        if (res.error) {
+            console.log(`Error en la creación del hallazgo: ${res.error}`)
+        } else {
+            console.log("Hallazgo creado exitosamente:", res)
+        }
+    } catch (error) {
+        console.error("Error crítico en bot_detector_hallazgo:", error)
     }
 
     console.log("Mensaje creado:", mensaje)
@@ -154,8 +160,6 @@ export async function obtener_mensajes_service(payload) {
 
     const mensajes = await obtener_mensajes_repo(canal_id, limit)
     const info_canal = await obtener_info_canal_repo(canal_id)
-
-    console.log("Mensajes obtenidos para canal", canal_id, ":", mensajes)
 
     return { data: { mensajes, info_canal }, status: 200 }
 }
