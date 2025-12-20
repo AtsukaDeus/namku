@@ -347,15 +347,27 @@ export default function Home({ u_nombre, u_rol }) {
 
         {/* Modal para visualizar imagen ampliada */}
         <Dialog open={modal_imagen_abierto} onOpenChange={set_modal_imagen_abierto}>
-            <DialogContent className="max-w-12xl min-w-12xl max-h-[120vh] min-h-[120vh] p-0 bg-black/95 border-none">
+            <DialogContent
+                className="p-0 bg-black/95 border-none overflow-hidden"
+                style={{
+                    maxWidth: '90vw',
+                    maxHeight: '90vh',
+                    width: '98vw',
+                    height: '98vh'
+                }}
+            >
                 <DialogTitle className="sr-only">Imagen ampliada</DialogTitle>
-                <div className="relative flex items-center justify-center p-4 max-w-12xl min-w-12xl max-h-[120vh] min-h-[120vh]">
-                    <Image
+                <div className="relative w-full h-full flex items-center justify-center">
+                    <img
                         src={imagen_modal}
                         alt="Imagen ampliada"
-                        width={1500}
-                        height={1200}
-                        className="object-contain rounded-lg max-w-12xl min-w-12xl max-h-[120vh] min-h-[120vh]"
+                        className="object-contain"
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            maxWidth: '98vw',
+                            maxHeight: '98vh'
+                        }}
                     />
                 </div>
             </DialogContent>
