@@ -155,7 +155,7 @@ criticidad tolerable
     return (
         // ===== CONTENEDOR PRINCIPAL DEL CHAT =====
         <>
-        <div className="relative min-h-[calc(90vh-5rem)] overflow-hidden rounded-3xl bg-[#f6f6fb] dark:bg-[#332d4a] border border-[#e1e3ec] dark:border-[#2f2948] shadow-md flex flex-col -mt-15">
+        <div className="min-h-[calc(90vh-5rem)] overflow-hidden rounded-3xl bg-[#f6f6fb] dark:bg-[#332d4a] border border-[#e1e3ec] dark:border-[#2f2948] shadow-md flex flex-col -mt-15">
             {/* Imagen de fondo decorativa */}
             <div className="absolute inset-0 bg-[url('/handshake-line.svg')] bg-center bg-contain bg-no-repeat opacity-20 dark:opacity-10 pointer-events-none" />
 
@@ -258,7 +258,7 @@ criticidad tolerable
 
                             {/* ===== BARRA DE ENVÍO DE MENSAJES ===== */}
                             {info_canal && (
-                            <div className="relative flex items-center gap-3 bg-[#e7e7f2] dark:bg-[#4a4168] border border-[#d3d2de] dark:border-[#312b48] rounded-full px-6 py-4 shadow-inner h-14 mt-4">
+                            <div className="relative flex items-center gap-3 bg-[#e7e7f2] dark:bg-[#4a4168] border border-[#d3d2de] dark:border-[#312b48] rounded-full px-6 py-4 shadow-inner h-14 -mt-2">
                                 <div className="relative">
                                     {/* Botón para opciones adicionales (foto, imagen) */}
                                     <Button
